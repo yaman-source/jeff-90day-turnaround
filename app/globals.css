@@ -98,10 +98,33 @@
 /* ── Smooth scrolling ───────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* iOS momentum scroll */
 }
 
-/* ── GPU compositing hint for fixed nav ────────────────────────────── */
-nav {
-  will-change: background-color, box-shadow;
+body {
+  overscroll-behavior-y: none; /* no bounce/chain on scroll edges */
+}
+
+/* ── WebGL canvas — isolated GPU layer, no layout interference ──────── */
+canvas {
   transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* ── Fixed nav — GPU compositing (only transform is composited) ─────── */
+nav {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ── Sections — isolate paint so one section doesn't invalidate others ─ */
+section {
+  contain: layout paint;
+}
+
+/* ── Below-fold sections skip render until near viewport ────────────── */
+section:not(:first-of-type) {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 600px;
 }

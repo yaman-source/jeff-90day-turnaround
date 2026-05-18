@@ -293,7 +293,7 @@ const AnimatedShaderHero: React.FC<HeroProps> = ({
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full object-contain touch-none"
-        style={{ background: "black" }}
+        style={{ background: "black", transform: "translateZ(0)", willChange: "transform", backfaceVisibility: "hidden" }}
         aria-hidden="true"
       />
 

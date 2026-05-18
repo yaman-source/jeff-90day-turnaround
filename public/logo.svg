@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 265" fill="none">
+  <!-- "90" — large, bold, dark slate -->
+  <text
+    x="14" y="192"
+    font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+    font-weight="800"
+    font-size="182"
+    fill="#4B5568"
+  >90</text>
+
+  <!-- "DAY" — right of "0", vertically centered upper half -->
+  <text
+    x="244" y="152"
+    font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+    font-weight="700"
+    font-size="54"
+    fill="#4B5568"
+  >DAY</text>
+
+  <!-- "TURNAROUND" — bottom row, spanning full width -->
+  <text
+    x="14" y="238"
+    font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+    font-weight="700"
+    font-size="52"
+    fill="#4B5568"
+    textLength="392"
+    lengthAdjust="spacing"
+  >TURNAROUND</text>
+
+  <!--
+    Orange arrow — emerges from inside the "0" and shoots upper-right.
+    A=(198,132) inside the "0" circle  →  B=(318,14) upper-right tip
+    Body half-width 11px, head half-width 27px, head length 40px
+  -->
+  <polygon
+    points="207,139 300,46 312,57 318,14 272,27 282,37 189,125"
+    fill="#C87941"
+  />
+</svg>

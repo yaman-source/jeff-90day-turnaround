@@ -122,48 +122,57 @@ const problems = [
 // ─── Offer cards ──────────────────────────────────────────────────────────────
 const offers = [
   {
-    name: "Growth Accelerator",
-    tag: "Ongoing Coaching",
-    desc: "Weekly coaching and ongoing strategic support. Once-a-week cadence — ideal for founders who have solid execution but need a seasoned operator's perspective on the big moves.",
+    name: "Growth Accelerator Advisory",
+    tag: "Ongoing Strategic Advisory",
+    price: "$2,000 – $3,000",
+    pricePeriod: "/month",
+    priceNote: "90-day minimum commitment",
+    desc: "Ongoing strategic guidance and accountability for founders who need a seasoned operator's perspective on the big moves without full hands-on engagement.",
     features: [
-      "Weekly 1:1 strategic sessions",
-      "Operator-level sounding board",
-      "Priority & decision support",
-      "Accountability check-ins",
-      "Email support between sessions",
+      "Strategic guidance & decision support",
+      "Weekly accountability sessions",
+      "Expansion planning",
+      "Team coaching",
     ],
-    note: "Monthly retainer. Min. 3-month commitment. Bundleable with AI Audit.",
+    note: "90-day minimum. Bundleable with AI Leverage Implementation.",
     icon: "M22 12h-4l-3 9L9 3l-3 9H2",
     featured: false,
   },
   {
-    name: "90-Day Turnaround",
+    name: "90-Day Turnaround Sprint",
     tag: "Flagship Engagement",
-    desc: "Jeff rolls up his sleeves and works inside your business. Full hands-on engagement — not coaching from the sidelines. Discovery through momentum.",
+    price: "$21,000 – $33,000",
+    pricePeriod: "",
+    priceNote: "90-Day Package",
+    desc: "Our team works inside your business — full hands-on engagement, not coaching from the sidelines. From discovery through locked-in momentum.",
     features: [
-      "Discovery & deep bottleneck audit",
-      "Custom 90-day execution roadmap",
-      "Scorecard & accountability framework",
-      "Hands-on execution support",
-      "Leadership & team coaching",
-      "AI leverage where it drives results",
+      "Business diagnostic & bottleneck analysis",
+      "Leadership alignment session",
+      "90-day execution roadmap",
+      "KPI scorecard",
+      "Weekly accountability cadence",
+      "Execution coaching & hands-on support",
+      "AI workflow opportunities audit",
     ],
-    note: "Priced by goalpost, not by hour. 50% upfront, 50% in month 2.",
+    note: "50% upfront, 50% in Month 2.",
     icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",
     featured: true,
   },
   {
-    name: "AI Integration Audit",
-    tag: "Standalone Service",
-    desc: "A focused audit that identifies exactly where AI can save time, reduce cost, and create leverage inside your specific business. Available standalone or bundled.",
+    name: "AI Leverage Implementation",
+    tag: "AI Systems & Automation",
+    price: "$4,000 – $10,000",
+    pricePeriod: "/month",
+    priceNote: "Based on complexity and scope",
+    desc: "We identify and implement AI-powered systems that save time, reduce cost, and create real leverage inside your business.",
     features: [
-      "Full operational AI opportunity scan",
-      "Prioritized integration roadmap",
-      "Cost & time savings estimates",
-      "Implementation guidance",
-      "Vendor recommendations",
+      "Sales follow-up automation",
+      "CRM workflows & SOP creation",
+      "Onboarding systems",
+      "AI assistants & internal GPT tools",
+      "Reporting automation",
     ],
-    note: "Flat-fee project engagement. Bundleable with Turnaround or Accelerator.",
+    note: "Scope and investment determined after discovery call.",
     icon: "M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18",
     featured: false,
   },
@@ -227,29 +236,40 @@ export default function Home() {
   };
 
   return (
-    <main className="bg-[#0D0D0D] text-white overflow-x-hidden">
+    <main className="bg-[#0D0D0D] text-white" style={{ overflowX: "clip" }}>
       {/* ════════════════════════════════════════════════════════════════
           NAV
       ════════════════════════════════════════════════════════════════ */}
       <nav
-        className={`fixed inset-x-0 top-0 z-50 flex items-center justify-between px-6 md:px-12 py-4 transition-all duration-300 ${
-          scrolled
-            ? "bg-[#0D0D0D]/98 shadow-[0_1px_0_rgba(200,121,65,0.15)]"
-            : "bg-[#0D0D0D]/80 backdrop-blur-md"
-        }`}
+        className="fixed inset-x-0 top-0 z-50 flex items-center justify-between px-6 md:px-12 py-4"
+        style={{
+          backgroundColor: scrolled ? "rgba(13,13,13,0.97)" : "rgba(13,13,13,0.72)",
+          boxShadow: scrolled ? "0 1px 0 rgba(200,121,65,0.15)" : "none",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          transition: "background-color 0.25s ease, box-shadow 0.25s ease",
+          transform: "translateZ(0)",
+          willChange: "auto",
+        }}
       >
         <a
           href="#"
-          className="text-[17px] font-black tracking-tight"
           onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+          className="flex items-center"
         >
-          90 Day <span className="text-[#C87941]">Turnaround</span>
+          <img
+            src="/logo.svg"
+            alt="90 Day Turnaround"
+            width={110}
+            height={70}
+            style={{ height: "64px", width: "auto" }}
+          />
         </a>
         <button
           onClick={() => scrollTo("qualify")}
           className="bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-sm px-5 py-2.5 rounded-[6px] transition-colors duration-200"
         >
-          Book a Call
+          See If You Qualify
         </button>
       </nav>
 
@@ -290,10 +310,10 @@ export default function Home() {
       <div className="bg-[#111827] border-y border-[#C87941]/15">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4">
           {[
-            { num: "30+", label: "Years operating at VP level and above" },
-            { num: "$7M→$47M", label: "Revenue growth driven inside client businesses" },
-            { num: "90", label: "Days to measurable, locked-in momentum" },
-            { num: "$20M", label: "Business personally operated & rebuilt" },
+            { num: "30+", label: "Years Operating at VP Level & Above" },
+            { num: "$7M→$47M", label: "Revenue Growth Driven" },
+            { num: "$20M", label: "Business Built & Operated Personally" },
+            { num: "90-Day", label: "Locked-In Momentum Framework" },
           ].map((s, i) => (
             <FadeUp key={s.num} delay={i * 0.08}>
               <div
@@ -363,11 +383,11 @@ export default function Home() {
                 </h3>
                 <p className="text-[#9CA3AF] text-[15px] leading-relaxed mb-4">
                   These aren&apos;t permanent problems. They&apos;re solvable — with the right
-                  operator in your corner, the right systems, and 90 focused days to execute.
+                  team in your corner, the right systems, and 90 focused days to execute.
                 </p>
                 <p className="text-[#9CA3AF] text-[15px] leading-relaxed mb-8">
-                  Jeff has been inside businesses just like yours. He doesn&apos;t coach from
-                  the sidelines. He rolls up his sleeves, finds the breaks, and helps you fix
+                  Our team has been inside businesses just like yours. We don&apos;t coach from
+                  the sidelines. We roll up our sleeves, find the breaks, and help you fix
                   them — fast.
                 </p>
                 <button
@@ -486,7 +506,7 @@ export default function Home() {
               className="text-[16px] border-[#C87941]/60 text-[#C87941] hover:border-[#C87941] px-14 py-4 rounded-[6px]"
               onClick={() => scrollTo("qualify")}
             >
-              Apply for a Discovery Call
+              See If You Qualify
             </NeonButton>
           </FadeUp>
         </div>
@@ -499,7 +519,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <FadeUp className="text-center mb-16">
             <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">
-              Three Ways to Work With Jeff
+              Three Ways to Work With Us
             </span>
             <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
               Choose Your Engagement Level
@@ -546,6 +566,18 @@ export default function Home() {
                   <p className="text-[11px] font-semibold uppercase tracking-[1.2px] text-[#C87941] mb-4">
                     {offer.tag}
                   </p>
+
+                  {/* Price */}
+                  <div className="mb-5 pb-5 border-b border-white/[0.06]">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-black text-white">{offer.price}</span>
+                      {offer.pricePeriod && (
+                        <span className="text-[#9CA3AF] text-sm">{offer.pricePeriod}</span>
+                      )}
+                    </div>
+                    <p className="text-[12px] text-[#C87941] mt-1">{offer.priceNote}</p>
+                  </div>
+
                   <p className="text-[14px] text-[#9CA3AF] leading-relaxed mb-6">{offer.desc}</p>
 
                   <ul className="space-y-2.5 mb-6 flex-1">
@@ -569,7 +601,7 @@ export default function Home() {
                         : "border border-[#C87941]/40 text-[#C87941] hover:bg-[#C87941]/10"
                     }`}
                   >
-                    Apply Now →
+                    See If You Qualify →
                   </button>
                 </div>
               </FadeUp>
@@ -604,17 +636,17 @@ export default function Home() {
               {
                 n: "01",
                 title: "Discovery Call",
-                body: "We talk. Jeff gets clear on where you are, where you want to go, and whether there's a real fit. If there is, we move to a full audit. If not, he'll tell you honestly.",
+                body: "We talk. Our team gets clear on where you are, where you want to go, and whether there's a real fit. If there is, we move to a full audit. If not, we'll tell you honestly.",
               },
               {
                 n: "02",
                 title: "90-Day Roadmap",
-                body: "Jeff audits your business — operations, sales, team, and systems — then builds a custom execution roadmap with clear priorities, owners, and measurable goalposts.",
+                body: "We audit your business — operations, sales, team, and systems — then build a custom execution roadmap with clear priorities, owners, and measurable goalposts.",
               },
               {
                 n: "03",
                 title: "Execute Together",
-                body: "We execute. Jeff stays in it with you — weekly sessions, real-time accountability, and course corrections until the momentum is locked in and self-sustaining.",
+                body: "We execute alongside you — weekly sessions, real-time accountability, and course corrections until the momentum is locked in and self-sustaining.",
               },
             ].map((step, i) => (
               <FadeUp key={step.n} delay={i * 0.1}>
@@ -640,23 +672,12 @@ export default function Home() {
             {/* Photo placeholder */}
             <FadeUp>
               <div className="relative">
-                {/* To add Jeff's photo: replace the inner content of this div with:
-                    <img src="/jeff-photo.jpg" alt="Jeff Lawrence" className="w-full h-full object-cover rounded-xl" />
-                */}
-                <div className="w-full aspect-[3/4] bg-[#111827] border border-white/[0.07] rounded-xl flex flex-col items-center justify-center gap-4 text-[#4A5568]">
-                  <svg
-                    width={52}
-                    height={52}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  <span className="text-sm">Jeff&apos;s photo goes here</span>
+                <div className="w-full aspect-[3/4] rounded-xl overflow-hidden border border-white/[0.07]">
+                  <img
+                    src="/jeff.png"
+                    alt="Jeff Lawrence — Founder, 90 Day Turnaround"
+                    className="w-full h-full object-cover object-center"
+                  />
                 </div>
                 {/* Credential badge */}
                 <div className="absolute -bottom-5 -right-5 bg-[#0D0D0D]/95 border border-[#C87941]/30 rounded-xl px-5 py-4 text-center backdrop-blur-sm">
@@ -679,15 +700,14 @@ export default function Home() {
               </span>
               <div className="w-12 h-[3px] bg-[#C87941] rounded-full mb-6" />
               <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-[1.1] mb-8">
-                He&apos;s Sat in{" "}
-                <span className="text-[#C87941]">Your Chair Before.</span>
+                Built From the{" "}
+                <span className="text-[#C87941]">Inside Out.</span>
               </h2>
 
               {[
-                "Jeff Lawrence isn't a consultant who's read the books. He's an operator who's lived them — 30+ years of VP-level and executive experience across industries, building and rebuilding businesses from the inside out.",
-                "He's run a $20M business. He's helped companies grow from $7M to $47M. He knows what it feels like when you're the one carrying it all — because he's been there, and he knows exactly what has to change.",
-                "In 2020, Jeff survived cancer. He ran a marathon. He came out the other side with a sharper sense of what matters and zero patience for businesses running at half their potential.",
-                "Today, Jeff works directly with founder-led businesses in Western Canada who've hit a ceiling — not as a coach who listens and nods, but as an operator who digs in and executes alongside you.",
+                "Jeff Lawrence is the founder of 90 Day Turnaround. For over 30 years he has operated at VP level and above inside major corporations and publicly traded companies — and built and scaled his own business to $20M+ before rebuilding it from scratch.",
+                "He has driven revenue growth from $7M to $47M inside client businesses, survived cancer, lost over 100 pounds, and now runs marathons. He brings the same discipline to business turnarounds that he brings to the trail.",
+                "Jeff leads the 90 Day Turnaround team — a network of fractional operators, CFOs, HR leaders, and growth specialists — to bring the right expertise to every engagement.",
               ].map((para, i) => (
                 <p key={i} className="text-[16px] text-[#9CA3AF] leading-[1.82] mb-4">
                   {para}
@@ -865,9 +885,9 @@ export default function Home() {
                       id: "service",
                       label: "Which service are you most interested in?",
                       options: [
-                        { v: "90-day-turnaround", l: "90-Day Turnaround" },
-                        { v: "growth-accelerator", l: "Growth Accelerator" },
-                        { v: "ai-audit", l: "AI Integration Audit" },
+                        { v: "90-day-turnaround-sprint", l: "90-Day Turnaround Sprint" },
+                        { v: "growth-accelerator-advisory", l: "Growth Accelerator Advisory" },
+                        { v: "ai-leverage-implementation", l: "AI Leverage Implementation" },
                         { v: "not-sure", l: "Not sure yet" },
                       ],
                     },
@@ -917,7 +937,7 @@ export default function Home() {
                     htmlFor="referral"
                     className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2"
                   >
-                    How did you hear about Jeff?{" "}
+                    How did you hear about us?{" "}
                     <span className="text-[#C87941]">*</span>
                   </label>
                   <select
@@ -946,11 +966,11 @@ export default function Home() {
                     type="submit"
                     className="w-full bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[16px] py-5 rounded-[6px] transition-colors duration-200"
                   >
-                    Apply for a Discovery Call
+                    See If You Qualify →
                   </button>
                   <p className="text-[13px] text-[#4A5568] text-center">
-                    By submitting, Jeff&apos;s team will review your application personally and
-                    reach out within 1–2 business days if there&apos;s a fit.
+                    Our team reviews every application personally and will reach out within
+                    1–2 business days if there&apos;s a fit.
                   </p>
                 </div>
               </form>
@@ -999,8 +1019,12 @@ export default function Home() {
       ════════════════════════════════════════════════════════════════ */}
       <footer className="bg-[#0D0D0D] border-t border-white/[0.055] py-10 px-6">
         <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-6">
-          <a href="#" className="text-[16px] font-black">
-            90 Day <span className="text-[#C87941]">Turnaround</span>
+          <a href="#" className="flex items-center">
+            <img
+              src="/logo.svg"
+              alt="90 Day Turnaround"
+              style={{ height: "72px", width: "auto" }}
+            />
           </a>
           <nav className="flex flex-wrap items-center gap-6">
             <a
@@ -1008,6 +1032,14 @@ export default function Home() {
               className="text-[14px] text-[#9CA3AF] hover:text-[#C87941] transition-colors"
             >
               jeff@90dayturnaround.ca
+            </a>
+            <a
+              href="https://90dayturnaround.ca"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[14px] text-[#9CA3AF] hover:text-[#C87941] transition-colors"
+            >
+              90dayturnaround.ca
             </a>
             <a
               href="https://linkedin.com/in/jtsales"
@@ -1021,11 +1053,11 @@ export default function Home() {
               onClick={() => scrollTo("qualify")}
               className="text-[14px] text-[#9CA3AF] hover:text-[#C87941] transition-colors"
             >
-              Apply Now
+              See If You Qualify
             </button>
           </nav>
           <p className="text-[13px] text-[#4A5568]">
-            © 2025 90 Day Turnaround. All rights reserved.
+            © 2026 90 Day Turnaround. All rights reserved.
           </p>
         </div>
       </footer>
