@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── shadcn CSS variables (dark theme tuned for Jeff Lawrence brand) ── */
+@layer base {
+  :root {
+    /* Default: dark mode as primary (Jeff's brand is dark) */
+    --background: 0 0% 5%;          /* #0D0D0D */
+    --foreground: 0 0% 100%;        /* #FFFFFF */
+    --card: 221 39% 11%;            /* #111827  */
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 26 55% 52%;          /* #C87941 orange */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 221 39% 11%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 221 39% 11%;
+    --muted-foreground: 218 11% 65%; /* #9CA3AF */
+    --accent: 221 39% 11%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 18%;
+    --input: 220 13% 18%;
+    --ring: 26 55% 52%;
+    --radius: 0.375rem;             /* 6px — Jeff brand */
+  }
+
+  /* Light mode override if ever needed */
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 222 84% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 84% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 84% 5%;
+    --primary: 26 55% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 26 55% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ── Hero shader animation utility classes ─────────────────────────── */
+/* These replace the <style jsx> block from animated-shader-hero.tsx    */
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.8s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-400 { animation-delay: 0.4s; }
+.animation-delay-600 { animation-delay: 0.6s; }
+.animation-delay-800 { animation-delay: 0.8s; }
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* ── Required by pricing component (Tailwind 3 equivalent of Tailwind 4 extras) */
+:root {
+  --destructive-foreground: 0 0% 100%;
+}
