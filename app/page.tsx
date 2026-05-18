@@ -1,11 +1,26 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
 import AnimatedShaderHero from "@/components/ui/animated-shader-hero";
 import { NeonButton } from "@/components/ui/neon-button";
 
-// ─── Fade-up wrapper ──────────────────────────────────────────────────────────
+// ─── Lightweight CSS fade-up (no framer-motion, single IntersectionObserver) ──
+const _observer =
+  typeof window !== "undefined"
+    ? new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              (e.target as HTMLElement).style.opacity = "1";
+              (e.target as HTMLElement).style.transform = "translateY(0)";
+              (_observer as IntersectionObserver).unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
+      )
+    : null;
+
 const FadeUp = ({
   children,
   delay = 0,
@@ -14,17 +29,29 @@ const FadeUp = ({
   children: React.ReactNode;
   delay?: number;
   className?: string;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 28 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-60px" }}
-    transition={{ duration: 0.62, delay, ease: [0.22, 1, 0.36, 1] }}
-    className={className}
-  >
-    {children}
-  </motion.div>
-);
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !_observer) return;
+    _observer.observe(el);
+    return () => _observer.unobserve(el);
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: 0,
+        transform: "translateY(24px)",
+        transition: `opacity 0.55s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.55s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+        willChange: "opacity, transform",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
 // ─── SVG icons ────────────────────────────────────────────────────────────────
 const Icon = ({ path, size = 22 }: { path: string; size?: number }) => (
@@ -165,9 +192,13 @@ export default function Home() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 48);
+    let rafId = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => setScrolled(window.scrollY > 48));
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(rafId); };
   }, []);
 
   const scrollTo = (id: string) =>
@@ -926,11 +957,9 @@ export default function Home() {
             </FadeUp>
           ) : (
             /* Success state */
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            <div
               className="text-center py-16 px-8 bg-[#C87941]/[0.06] border border-[#C87941]/25 rounded-xl"
+              style={{ animation: "fadeScaleIn 0.5s cubic-bezier(0.22,1,0.36,1) both" }}
             >
               <div className="w-20 h-20 bg-[#C87941]/10 rounded-full flex items-center justify-center mx-auto mb-7">
                 <svg
@@ -960,7 +989,7 @@ export default function Home() {
               >
                 Book Your Discovery Call →
               </a>
-            </motion.div>
+            </div>
           )}
         </div>
       </section>

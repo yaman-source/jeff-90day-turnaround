@@ -220,6 +220,10 @@ function useShaderBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
   const rendererRef = useRef<WebGLRenderer | null>(null);
+  const visibleRef = useRef<boolean>(true);
+  const lastFrameRef = useRef<number>(0);
+  const FPS_CAP = 30;
+  const FRAME_MS = 1000 / FPS_CAP;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -243,19 +247,30 @@ function useShaderBackground() {
       rendererRef.current.updateShader(defaultShaderSource);
     }
 
+    // Pause rendering when hero is scrolled out of view
+    const observer = new IntersectionObserver(
+      ([entry]) => { visibleRef.current = entry.isIntersecting; },
+      { threshold: 0 }
+    );
+    observer.observe(canvas);
+
     const loop = (now: number) => {
-      rendererRef.current?.render(now);
       rafRef.current = requestAnimationFrame(loop);
+      if (!visibleRef.current) return;           // off-screen → skip
+      if (now - lastFrameRef.current < FRAME_MS) return; // cap to 30fps
+      lastFrameRef.current = now;
+      rendererRef.current?.render(now);
     };
     loop(0);
 
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", resize, { passive: true });
     return () => {
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(rafRef.current);
+      observer.disconnect();
       rendererRef.current?.reset();
     };
-  }, []);
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
   return canvasRef;
 }
