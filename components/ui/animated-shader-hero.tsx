@@ -310,16 +310,6 @@ const AnimatedShaderHero: React.FC<HeroProps> = ({
 
       {/* Content — relative so it drives the container height; min-h-dvh centres on large screens */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-dvh text-white pt-24 pb-16 px-4">
-        {trustBadge && (
-          <div className="mb-6 animate-fade-in-down">
-            <div className="flex items-center gap-2 px-5 py-2.5 bg-orange-500/10 backdrop-blur-md border border-orange-300/30 rounded-full text-sm">
-              {trustBadge.icons?.map((icon, i) => (
-                <span key={i}>{icon}</span>
-              ))}
-              <span className="text-orange-100 text-xs sm:text-sm">{trustBadge.text}</span>
-            </div>
-          </div>
-        )}
 
         <div className="text-center max-w-5xl mx-auto w-full">
           <div className="space-y-1 mb-6">
