@@ -729,9 +729,9 @@ export default function Home() {
               <div className="relative">
                 <div className="w-full aspect-[3/4] rounded-xl overflow-hidden border border-white/[0.07]">
                   <img
-                    src="/jeff.png"
+                    src="/jeff-pro.jpg"
                     alt="Jeff Lawrence — Founder, 90 Day Turnaround"
-                    className="w-full h-full object-cover object-center"
+                    className="w-full h-full object-cover object-top"
                   />
                 </div>
                 {/* Credential badge */}
