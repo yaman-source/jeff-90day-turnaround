@@ -71,7 +71,7 @@ const problems = [
   {
     icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
     title: "You're the bottleneck.",
-    body: "Every decision, every problem, every fire circles back to you. Nothing moves without your sign-off — and that's suffocating the business.",
+    body: "Every decision, every problem, every fire circles back to you. Nothing moves without your sign-off, and that's suffocating the business.",
   },
   {
     icon: "M18 20V10M12 20V4M6 20v-6",
@@ -81,28 +81,26 @@ const problems = [
   {
     icon: "M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7z M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16",
     title: "No operating systems.",
-    body: "Things get done by memory, heroics, and habit — not by documented, repeatable processes your team can actually own and execute without you.",
+    body: "Things get done by memory, heroics, and habit, not by documented, repeatable processes your team can actually own and execute without you.",
   },
   {
     icon: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75 M9 7a4 4 0 1 1 0-8 4 4 0 0 1 0 8z",
     title: "Your team isn't accountable.",
-    body: "Deadlines slip, ownership is fuzzy, and you keep doing work your team should be handling — because it's faster than fighting for accountability.",
+    body: "Deadlines slip, ownership is fuzzy, and you keep doing work your team should be handling, because it's faster than fighting for accountability.",
   },
   {
     icon: "M13 2 3 14h9l-1 8 10-12h-9l1-8z",
     title: "Growth has stalled.",
-    body: "You hit a ceiling you can't break past — and it's been months. Maybe years. You know something fundamental needs to change, but what?",
+    body: "You hit a ceiling you can't break past, and it's been months. Maybe years. You know something fundamental needs to change, but what?",
   },
   {
     icon: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 6v6l4 2",
     title: "You're busy, not strategic.",
-    body: "You work in the business constantly — rarely on it. The vision is buried under daily fires, and you can't see a clear path out of the chaos.",
+    body: "You work in the business constantly. Rarely on it. The vision is buried under daily fires, and you can't see a clear path out of the chaos.",
   },
 ];
 
 // ─── Offer cards ──────────────────────────────────────────────────────────────
-// Change 3: all investmentLine identical
-// Change 4: qualifies cleared on offer 4
 const offers = [
   {
     name: "Growth Accelerator Advisory",
@@ -123,7 +121,7 @@ const offers = [
   {
     name: "90-Day Turnaround Sprint",
     tag: "Flagship Engagement",
-    desc: "Our team works inside your business — full hands-on engagement, not coaching from the sidelines. From discovery through locked-in momentum.",
+    desc: "Our team works inside your business, full hands-on engagement, not coaching from the sidelines. From discovery through locked-in momentum.",
     features: [
       "Business diagnostic & bottleneck analysis",
       "Leadership alignment session",
@@ -172,7 +170,7 @@ const offers = [
       "KPI and support model planning",
       "Optional implementation advisory for rollout execution",
     ],
-    qualifies: [] as string[], // Change 4: removed "This is right for you if..." section
+    qualifies: [] as string[],
     investmentLine: "Package price to be determined after discovery call",
     note: "",
     icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10",
@@ -270,7 +268,7 @@ export default function Home() {
       <AnimatedShaderHero
         trustBadge={{ text: "Western Canada's Business Turnaround Specialist", icons: ["✦"] }}
         headline={{ line1: "Your Business", line2: "Has Hit a Ceiling.", line3: "Let's Break Through It." }}
-        subtitle="You've built something real — but growth has stalled, chaos is creeping in, and you're doing too much yourself. 90 days is all it takes to change that."
+        subtitle="You've built something real, but growth has stalled, chaos is creeping in, and you're doing too much yourself. 90 days is all it takes to change that."
         buttons={{
           primary: { text: "Book a Discovery Call", onClick: () => scrollTo("qualify") },
           secondary: { text: "View Services →", onClick: () => scrollTo("offers") },
@@ -301,203 +299,6 @@ export default function Home() {
       </div>
 
       {/* ════════════════════════════════════════════════════════════════
-          TESTIMONIALS PLACEHOLDER — Change 11
-          (positioned just before the intake form)
-      ════════════════════════════════════════════════════════════════ */}
-      <section className="py-24 px-6 bg-[#0D0D0D]">
-        <div className="max-w-6xl mx-auto">
-          <FadeUp className="text-center mb-14">
-            <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">
-              Client Results
-            </span>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
-              What Our Clients Say
-            </h2>
-            <p className="text-[#9CA3AF] text-lg max-w-md mx-auto leading-relaxed">
-              Real results from founder-led businesses that went through the 90-day process.
-            </p>
-          </FadeUp>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {[0, 1, 2].map((i) => (
-              <FadeUp key={i} delay={i * 0.1}>
-                <div className="flex flex-col p-8 rounded-xl bg-white/[0.025] border border-white/[0.07] h-full min-h-[260px]">
-                  {/* Quote mark */}
-                  <div className="text-5xl font-black text-[#C87941]/20 leading-none mb-4 select-none">&ldquo;</div>
-                  {/* Quote placeholder */}
-                  <div className="flex-1 mb-6">
-                    <div className="h-4 bg-white/[0.05] rounded mb-3 w-full" />
-                    <div className="h-4 bg-white/[0.05] rounded mb-3 w-5/6" />
-                    <div className="h-4 bg-white/[0.05] rounded w-4/6" />
-                  </div>
-                  {/* Client info placeholder */}
-                  <div className="border-t border-white/[0.06] pt-5">
-                    <div className="h-3.5 bg-white/[0.06] rounded mb-2 w-32" />
-                    <div className="h-3 bg-white/[0.04] rounded w-24" />
-                  </div>
-                </div>
-              </FadeUp>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════
-          INTAKE FORM — Change 7: moved up, just after testimonials
-      ════════════════════════════════════════════════════════════════ */}
-      <section id="qualify" className="py-28 px-6 bg-[#111827]">
-        <div className="max-w-[780px] mx-auto">
-          <FadeUp className="text-center mb-14">
-            <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">
-              Apply for a Discovery Call
-            </span>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
-              Let&apos;s Start the Conversation
-            </h2>
-            <p className="text-[#9CA3AF] text-lg max-w-lg mx-auto leading-relaxed">
-              Jeff works with a limited number of businesses at a time. Complete the form below
-              so we can determine if there&apos;s a fit before scheduling your call.
-            </p>
-          </FadeUp>
-
-          {!submitted ? (
-            <FadeUp delay={0.1}>
-              <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {(
-                  [
-                    { id: "fname", label: "First Name", type: "text", placeholder: "Jeff", col: 1 },
-                    { id: "lname", label: "Last Name", type: "text", placeholder: "Lawrence", col: 1 },
-                    { id: "email", label: "Business Email", type: "email", placeholder: "you@yourcompany.com", col: 1 },
-                    { id: "company", label: "Company Name", type: "text", placeholder: "Acme Corp.", col: 1 },
-                    { id: "website", label: "Company Website", type: "url", placeholder: "https://yourcompany.com", col: 2 },
-                  ] as const
-                ).map((f) => (
-                  <div key={f.id} className={f.col === 2 ? "sm:col-span-2" : ""}>
-                    <label htmlFor={f.id} className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
-                      {f.label} <span className="text-[#C87941]">*</span>
-                    </label>
-                    <input
-                      id={f.id} name={f.id} type={f.type} placeholder={f.placeholder}
-                      value={form[f.id]} onChange={handleChange}
-                      className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] text-white placeholder:text-[#4A5568] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] ${errors[f.id] ? "border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.13)]" : "border-white/10"}`}
-                    />
-                  </div>
-                ))}
-
-                <div className="sm:col-span-2">
-                  <label htmlFor="challenge" className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
-                    What is your biggest challenge right now? <span className="text-[#C87941]">*</span>
-                  </label>
-                  <textarea
-                    id="challenge" name="challenge" rows={4}
-                    placeholder="Be specific — what's the thing keeping you up at night?"
-                    value={form.challenge} onChange={handleChange}
-                    className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] text-white placeholder:text-[#4A5568] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] resize-y ${errors.challenge ? "border-red-500" : "border-white/10"}`}
-                  />
-                </div>
-
-                {(
-                  [
-                    {
-                      id: "service",
-                      label: "Which service are you most interested in?",
-                      options: [
-                        { v: "90-day-turnaround-sprint", l: "90-Day Turnaround Sprint" },
-                        { v: "growth-accelerator-advisory", l: "Growth Accelerator Advisory" },
-                        { v: "ai-leverage-implementation", l: "AI Leverage Implementation" },
-                        { v: "expansion-readiness-blueprint", l: "Expansion Readiness Blueprint" },
-                        { v: "not-sure", l: "Not sure yet" },
-                      ],
-                    },
-                    {
-                      id: "timeline",
-                      label: "What is your timeline?",
-                      options: [
-                        { v: "immediately", l: "Immediately" },
-                        { v: "30-days", l: "Within 30 days" },
-                        { v: "90-days", l: "Within 90 days" },
-                        { v: "exploring", l: "Just exploring" },
-                      ],
-                    },
-                  ] as const
-                ).map((f) => (
-                  <div key={f.id}>
-                    <label htmlFor={f.id} className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
-                      {f.label} <span className="text-[#C87941]">*</span>
-                    </label>
-                    <select
-                      id={f.id} name={f.id} value={form[f.id]} onChange={handleChange}
-                      className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] appearance-none cursor-pointer ${errors[f.id] ? "border-red-500" : "border-white/10"} ${form[f.id] === "" ? "text-[#4A5568]" : "text-white"}`}
-                    >
-                      <option value="" disabled>Select…</option>
-                      {f.options.map((o) => (
-                        <option key={o.v} value={o.v} className="bg-[#1a1f2e] text-white">{o.l}</option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
-
-                <div className="sm:col-span-2">
-                  <label htmlFor="referral" className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
-                    How did you hear about us? <span className="text-[#C87941]">*</span>
-                  </label>
-                  <select
-                    id="referral" name="referral" value={form.referral} onChange={handleChange}
-                    className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] appearance-none cursor-pointer ${errors.referral ? "border-red-500" : "border-white/10"} ${form.referral === "" ? "text-[#4A5568]" : "text-white"}`}
-                  >
-                    <option value="" disabled>Select…</option>
-                    {["LinkedIn", "Referral", "Google", "Other"].map((o) => (
-                      <option key={o} value={o.toLowerCase()} className="bg-[#1a1f2e] text-white">{o}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Submit — Change 9: no arrow on button */}
-                <div className="sm:col-span-2 mt-2 flex flex-col items-center gap-4">
-                  <button
-                    type="submit"
-                    className="w-full bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[16px] py-5 rounded-[6px] transition-colors duration-200"
-                  >
-                    Book a Discovery Call
-                  </button>
-                  {/* Change 10: updated fine print */}
-                  <p className="text-[13px] text-[#4A5568] text-center">
-                    We review every application personally and will reach out within 3 to 4 business days.
-                  </p>
-                </div>
-              </form>
-            </FadeUp>
-          ) : (
-            <div
-              className="text-center py-16 px-8 bg-[#C87941]/[0.06] border border-[#C87941]/25 rounded-xl"
-              style={{ animation: "fadeScaleIn 0.5s cubic-bezier(0.22,1,0.36,1) both" }}
-            >
-              <div className="w-20 h-20 bg-[#C87941]/10 rounded-full flex items-center justify-center mx-auto mb-7">
-                <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="#C87941" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              <h3 className="text-3xl font-black mb-4">Application Received.</h3>
-              <p className="text-[#9CA3AF] text-[16px] max-w-md mx-auto leading-relaxed mb-10">
-                Thanks for applying. Jeff&apos;s team reviews every submission personally. If
-                there&apos;s a fit, you&apos;ll hear back within 3 to 4 business days to schedule
-                your discovery call.
-              </p>
-              {/* Change 9: no arrow */}
-              <a
-                href="https://calendly.com/jt-sales"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[16px] px-12 py-5 rounded-[6px] transition-colors duration-200"
-              >
-                Book Your Discovery Call
-              </a>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════
           PROBLEM SECTION
       ════════════════════════════════════════════════════════════════ */}
       <section className="py-28 px-6">
@@ -517,7 +318,7 @@ export default function Home() {
                   <span className="text-[#C87941]">You&apos;re Still Stuck.</span>
                 </h2>
                 <p className="text-[#9CA3AF] text-lg mb-10 leading-relaxed">
-                  If any of these feel uncomfortably close to home — keep reading.
+                  If any of these feel uncomfortably close to home, keep reading.
                 </p>
               </FadeUp>
 
@@ -538,17 +339,16 @@ export default function Home() {
             <FadeUp delay={0.2}>
               <div className="sticky top-28 p-10 rounded-xl bg-gradient-to-br from-[#C87941]/10 to-[#C87941]/[0.03] border border-[#C87941]/30">
                 <h3 className="text-2xl font-bold leading-snug mb-5">
-                  If this sounds like you — keep reading.
+                  If this sounds like you, keep reading.
                 </h3>
                 <p className="text-[#9CA3AF] text-[15px] leading-relaxed mb-4">
-                  These aren&apos;t permanent problems. They&apos;re solvable — with the right
+                  These aren&apos;t permanent problems. They&apos;re solvable. With the right
                   team in your corner, the right systems, and 90 focused days to execute.
                 </p>
                 <p className="text-[#9CA3AF] text-[15px] leading-relaxed mb-8">
                   Our team has been inside businesses just like yours. We don&apos;t coach from
-                  the sidelines. We roll up our sleeves, find the breaks, and help you fix them — fast.
+                  the sidelines. We roll up our sleeves, find the breaks, and help you fix them. Fast.
                 </p>
-                {/* Change 9: no arrow */}
                 <button
                   onClick={() => scrollTo("qualify")}
                   className="w-full bg-[#C87941] hover:bg-[#b06830] text-white font-bold py-4 rounded-[6px] transition-colors duration-200 text-center"
@@ -594,7 +394,6 @@ export default function Home() {
               the ones whose founders were willing to stop, fix what&apos;s broken, and execute
               with intention. That&apos;s what we build together.
             </p>
-            {/* Change 9: no arrow */}
             <NeonButton
               size="lg"
               className="text-[16px] border-[#C87941]/60 text-[#C87941] hover:border-[#C87941] px-14 py-4 rounded-[6px]"
@@ -619,7 +418,7 @@ export default function Home() {
               Choose Your Engagement Level
             </h2>
             <p className="text-[#9CA3AF] text-lg max-w-xl mx-auto leading-relaxed">
-              From full hands-on execution to a focused standalone blueprint — there&apos;s a model
+              From full hands-on execution to a focused standalone blueprint, there&apos;s a model
               built for where you are right now.
             </p>
           </FadeUp>
@@ -643,7 +442,6 @@ export default function Home() {
                   <p className="text-lg font-bold mb-1">{offer.name}</p>
                   <p className="text-[11px] font-semibold uppercase tracking-[1.2px] text-[#C87941] mb-4">{offer.tag}</p>
 
-                  {/* Change 3: unified investment line */}
                   <div className="mb-5 pb-5 border-b border-white/[0.06]">
                     <p className="text-[13px] text-[#C87941]/80 italic">{offer.investmentLine}</p>
                   </div>
@@ -658,7 +456,6 @@ export default function Home() {
                     ))}
                   </ul>
 
-                  {/* Change 4: qualifies section removed from offer 4 (qualifies is empty) */}
                   {offer.qualifies.length > 0 && (
                     <div className="mb-6 p-4 rounded-lg bg-[#C87941]/[0.06] border border-[#C87941]/20">
                       <p className="text-[11px] font-bold uppercase tracking-[1.2px] text-[#C87941] mb-3">This is right for you if…</p>
@@ -678,7 +475,6 @@ export default function Home() {
                     </div>
                   ) : <div className="mb-6" />}
 
-                  {/* Change 9: no arrow on card buttons */}
                   <button
                     onClick={() => scrollTo("qualify")}
                     className={`w-full py-3.5 rounded-[6px] font-bold text-sm transition-colors duration-200 ${offer.featured ? "bg-[#C87941] hover:bg-[#b06830] text-white" : "border border-[#C87941]/40 text-[#C87941] hover:bg-[#C87941]/10"}`}
@@ -690,7 +486,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Progression line — Change 5: subline below removed */}
           <FadeUp delay={0.2}>
             <div className="mt-16 text-center">
               <div className="flex flex-wrap items-center justify-center gap-2 text-lg md:text-xl font-black">
@@ -726,8 +521,8 @@ export default function Home() {
             <div className="hidden md:block absolute top-[44px] left-[calc(16.666%+24px)] right-[calc(16.666%+24px)] h-px bg-gradient-to-r from-[#C87941] via-[#C87941]/30 to-[#C87941]" />
             {[
               { n: "01", title: "Discovery Call", body: "We talk. Our team gets clear on where you are, where you want to go, and whether there's a real fit. If there is, we move to a full audit. If not, we'll tell you honestly." },
-              { n: "02", title: "90-Day Roadmap", body: "We audit your business — operations, sales, team, and systems — then build a custom execution roadmap with clear priorities, owners, and measurable goalposts." },
-              { n: "03", title: "Execute Together", body: "We execute alongside you — weekly sessions, real-time accountability, and course corrections until the momentum is locked in and self-sustaining." },
+              { n: "02", title: "90-Day Roadmap", body: "We audit your business, operations, sales, team, and systems, then build a custom execution roadmap with clear priorities, owners, and measurable goalposts." },
+              { n: "03", title: "Execute Together", body: "We execute alongside you, weekly sessions, real-time accountability, and course corrections until the momentum is locked in and self-sustaining." },
             ].map((step, i) => (
               <FadeUp key={step.n} delay={i * 0.1}>
                 <div className="flex flex-col items-center text-center px-8 py-4">
@@ -797,7 +592,6 @@ export default function Home() {
                 aligning strategy, leadership, operations, and execution.
               </p>
 
-              {/* Change 6: "VP Level & Above" tag removed */}
               <div className="flex flex-wrap gap-2.5 mt-8">
                 {[
                   ["30+", "Years Experience"],
@@ -815,6 +609,196 @@ export default function Home() {
               </div>
             </FadeUp>
           </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          TESTIMONIALS PLACEHOLDER
+      ════════════════════════════════════════════════════════════════ */}
+      <section className="py-24 px-6 bg-[#111827]">
+        <div className="max-w-6xl mx-auto">
+          <FadeUp className="text-center mb-14">
+            <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">
+              Client Results
+            </span>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
+              What Our Clients Say
+            </h2>
+            <p className="text-[#9CA3AF] text-lg max-w-md mx-auto leading-relaxed">
+              Real results from founder-led businesses that went through the 90-day process.
+            </p>
+          </FadeUp>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[0, 1, 2].map((i) => (
+              <FadeUp key={i} delay={i * 0.1}>
+                <div className="flex flex-col p-8 rounded-xl bg-white/[0.025] border border-white/[0.07] h-full min-h-[260px]">
+                  <div className="text-5xl font-black text-[#C87941]/20 leading-none mb-4 select-none">&ldquo;</div>
+                  <div className="flex-1 mb-6">
+                    <div className="h-4 bg-white/[0.05] rounded mb-3 w-full" />
+                    <div className="h-4 bg-white/[0.05] rounded mb-3 w-5/6" />
+                    <div className="h-4 bg-white/[0.05] rounded w-4/6" />
+                  </div>
+                  <div className="border-t border-white/[0.06] pt-5">
+                    <div className="h-3.5 bg-white/[0.06] rounded mb-2 w-32" />
+                    <div className="h-3 bg-white/[0.04] rounded w-24" />
+                  </div>
+                </div>
+              </FadeUp>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          INTAKE FORM
+      ════════════════════════════════════════════════════════════════ */}
+      <section id="qualify" className="py-28 px-6 bg-[#0D0D0D]">
+        <div className="max-w-[780px] mx-auto">
+          <FadeUp className="text-center mb-14">
+            <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">
+              Apply for a Discovery Call
+            </span>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
+              Let&apos;s Start the Conversation
+            </h2>
+            <p className="text-[#9CA3AF] text-lg max-w-lg mx-auto leading-relaxed">
+              Jeff works with a limited number of businesses at a time. Complete the form below
+              so we can determine if there&apos;s a fit before scheduling your call.
+            </p>
+          </FadeUp>
+
+          {!submitted ? (
+            <FadeUp delay={0.1}>
+              <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {(
+                  [
+                    { id: "fname", label: "First Name", type: "text", placeholder: "Jeff", col: 1 },
+                    { id: "lname", label: "Last Name", type: "text", placeholder: "Lawrence", col: 1 },
+                    { id: "email", label: "Business Email", type: "email", placeholder: "you@yourcompany.com", col: 1 },
+                    { id: "company", label: "Company Name", type: "text", placeholder: "Acme Corp.", col: 1 },
+                    { id: "website", label: "Company Website", type: "url", placeholder: "https://yourcompany.com", col: 2 },
+                  ] as const
+                ).map((f) => (
+                  <div key={f.id} className={f.col === 2 ? "sm:col-span-2" : ""}>
+                    <label htmlFor={f.id} className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
+                      {f.label} <span className="text-[#C87941]">*</span>
+                    </label>
+                    <input
+                      id={f.id} name={f.id} type={f.type} placeholder={f.placeholder}
+                      value={form[f.id]} onChange={handleChange}
+                      className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] text-white placeholder:text-[#4A5568] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] ${errors[f.id] ? "border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.13)]" : "border-white/10"}`}
+                    />
+                  </div>
+                ))}
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="challenge" className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
+                    What is your biggest challenge right now? <span className="text-[#C87941]">*</span>
+                  </label>
+                  <textarea
+                    id="challenge" name="challenge" rows={4}
+                    placeholder="Be specific, what's the thing keeping you up at night?"
+                    value={form.challenge} onChange={handleChange}
+                    className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] text-white placeholder:text-[#4A5568] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] resize-y ${errors.challenge ? "border-red-500" : "border-white/10"}`}
+                  />
+                </div>
+
+                {(
+                  [
+                    {
+                      id: "service",
+                      label: "Which service are you most interested in?",
+                      options: [
+                        { v: "90-day-turnaround-sprint", l: "90-Day Turnaround Sprint" },
+                        { v: "growth-accelerator-advisory", l: "Growth Accelerator Advisory" },
+                        { v: "ai-leverage-implementation", l: "AI Leverage Implementation" },
+                        { v: "expansion-readiness-blueprint", l: "Expansion Readiness Blueprint" },
+                        { v: "not-sure", l: "Not sure yet" },
+                      ],
+                    },
+                    {
+                      id: "timeline",
+                      label: "What is your timeline?",
+                      options: [
+                        { v: "immediately", l: "Immediately" },
+                        { v: "30-days", l: "Within 30 days" },
+                        { v: "90-days", l: "Within 90 days" },
+                        { v: "exploring", l: "Just exploring" },
+                      ],
+                    },
+                  ] as const
+                ).map((f) => (
+                  <div key={f.id}>
+                    <label htmlFor={f.id} className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
+                      {f.label} <span className="text-[#C87941]">*</span>
+                    </label>
+                    <select
+                      id={f.id} name={f.id} value={form[f.id]} onChange={handleChange}
+                      className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] appearance-none cursor-pointer ${errors[f.id] ? "border-red-500" : "border-white/10"} ${form[f.id] === "" ? "text-[#4A5568]" : "text-white"}`}
+                    >
+                      <option value="" disabled>Select…</option>
+                      {f.options.map((o) => (
+                        <option key={o.v} value={o.v} className="bg-[#1a1f2e] text-white">{o.l}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="referral" className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
+                    How did you hear about us? <span className="text-[#C87941]">*</span>
+                  </label>
+                  <select
+                    id="referral" name="referral" value={form.referral} onChange={handleChange}
+                    className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] appearance-none cursor-pointer ${errors.referral ? "border-red-500" : "border-white/10"} ${form.referral === "" ? "text-[#4A5568]" : "text-white"}`}
+                  >
+                    <option value="" disabled>Select…</option>
+                    {["LinkedIn", "Referral", "Google", "Other"].map((o) => (
+                      <option key={o} value={o.toLowerCase()} className="bg-[#1a1f2e] text-white">{o}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="sm:col-span-2 mt-2 flex flex-col items-center gap-4">
+                  <button
+                    type="submit"
+                    className="w-full bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[16px] py-5 rounded-[6px] transition-colors duration-200"
+                  >
+                    Book a Discovery Call
+                  </button>
+                  <p className="text-[13px] text-[#4A5568] text-center">
+                    We review every application personally and will reach out within 3 to 4 business days.
+                  </p>
+                </div>
+              </form>
+            </FadeUp>
+          ) : (
+            <div
+              className="text-center py-16 px-8 bg-[#C87941]/[0.06] border border-[#C87941]/25 rounded-xl"
+              style={{ animation: "fadeScaleIn 0.5s cubic-bezier(0.22,1,0.36,1) both" }}
+            >
+              <div className="w-20 h-20 bg-[#C87941]/10 rounded-full flex items-center justify-center mx-auto mb-7">
+                <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="#C87941" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h3 className="text-3xl font-black mb-4">Application Received.</h3>
+              <p className="text-[#9CA3AF] text-[16px] max-w-md mx-auto leading-relaxed mb-10">
+                Thanks for applying. Jeff&apos;s team reviews every submission personally. If
+                there&apos;s a fit, you&apos;ll hear back within 3 to 4 business days to schedule
+                your discovery call.
+              </p>
+              <a
+                href="https://calendly.com/jt-sales"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[16px] px-12 py-5 rounded-[6px] transition-colors duration-200"
+              >
+                Book Your Discovery Call
+              </a>
+            </div>
+          )}
         </div>
       </section>
 
