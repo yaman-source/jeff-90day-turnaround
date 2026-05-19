@@ -233,8 +233,12 @@ function useShaderBackground() {
 
     const resize = () => {
       if (!canvasRef.current) return;
-      canvasRef.current.width = window.innerWidth * dpr;
-      canvasRef.current.height = window.innerHeight * dpr;
+      // Use container dimensions so canvas fills the hero even when it's taller than viewport
+      const container = canvasRef.current.parentElement;
+      const w = container ? container.offsetWidth : window.innerWidth;
+      const h = container ? container.offsetHeight : window.innerHeight;
+      canvasRef.current.width = w * dpr;
+      canvasRef.current.height = h * dpr;
       rendererRef.current?.updateScale(dpr);
     };
 
@@ -254,10 +258,14 @@ function useShaderBackground() {
     );
     observer.observe(canvas);
 
+    // Watch for container height changes (e.g. font load, content shift)
+    const ro = new ResizeObserver(resize);
+    if (canvas.parentElement) ro.observe(canvas.parentElement);
+
     const loop = (now: number) => {
       rafRef.current = requestAnimationFrame(loop);
-      if (!visibleRef.current) return;           // off-screen → skip
-      if (now - lastFrameRef.current < FRAME_MS) return; // cap to 30fps
+      if (!visibleRef.current) return;
+      if (now - lastFrameRef.current < FRAME_MS) return;
       lastFrameRef.current = now;
       rendererRef.current?.render(now);
     };
@@ -268,6 +276,7 @@ function useShaderBackground() {
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(rafRef.current);
       observer.disconnect();
+      ro.disconnect();
       rendererRef.current?.reset();
     };
   }, []);  // eslint-disable-line react-hooks/exhaustive-deps
@@ -289,54 +298,57 @@ const AnimatedShaderHero: React.FC<HeroProps> = ({
   const canvasRef = useShaderBackground();
 
   return (
-    <div className={`relative w-full h-screen overflow-hidden bg-black ${className}`}>
+    // min-h-dvh: expands to fit content on short screens; overflow-x-hidden only
+    <div className={`relative w-full min-h-dvh overflow-x-hidden bg-black ${className}`}>
+      {/* Canvas fills the full container height (not just window height) */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full object-contain touch-none"
+        className="absolute inset-0 w-full h-full touch-none"
         style={{ background: "black", transform: "translateZ(0)", willChange: "transform", backfaceVisibility: "hidden" }}
         aria-hidden="true"
       />
 
-      {/* Content overlay */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-white">
+      {/* Content — relative so it drives the container height; min-h-dvh centres on large screens */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-dvh text-white pt-24 pb-16 px-4">
         {trustBadge && (
-          <div className="mb-8 animate-fade-in-down">
-            <div className="flex items-center gap-2 px-6 py-3 bg-orange-500/10 backdrop-blur-md border border-orange-300/30 rounded-full text-sm">
+          <div className="mb-6 animate-fade-in-down">
+            <div className="flex items-center gap-2 px-5 py-2.5 bg-orange-500/10 backdrop-blur-md border border-orange-300/30 rounded-full text-sm">
               {trustBadge.icons?.map((icon, i) => (
                 <span key={i}>{icon}</span>
               ))}
-              <span className="text-orange-100">{trustBadge.text}</span>
+              <span className="text-orange-100 text-xs sm:text-sm">{trustBadge.text}</span>
             </div>
           </div>
         )}
 
-        <div className="text-center space-y-6 max-w-5xl mx-auto px-4">
-          <div className="space-y-1">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black bg-gradient-to-r from-orange-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent animate-fade-in-up animation-delay-200">
+        <div className="text-center max-w-5xl mx-auto w-full">
+          <div className="space-y-1 mb-6">
+            {/* Mobile-first font scaling: 2rem → 3rem sm → 4.5rem md → 6rem lg */}
+            <h1 className="text-[2rem] sm:text-5xl md:text-7xl lg:text-8xl font-black bg-gradient-to-r from-orange-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent animate-fade-in-up animation-delay-200 leading-tight">
               {headline.line1}
             </h1>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 bg-clip-text text-transparent animate-fade-in-up animation-delay-400">
+            <h1 className="text-[2rem] sm:text-5xl md:text-7xl lg:text-8xl font-black bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 bg-clip-text text-transparent animate-fade-in-up animation-delay-400 leading-tight">
               {headline.line2}
             </h1>
             {headline.line3 && (
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black bg-gradient-to-r from-orange-200 via-amber-300 to-orange-400 bg-clip-text text-transparent animate-fade-in-up animation-delay-600">
+              <h1 className="text-[2rem] sm:text-5xl md:text-7xl lg:text-8xl font-black bg-gradient-to-r from-orange-200 via-amber-300 to-orange-400 bg-clip-text text-transparent animate-fade-in-up animation-delay-600 leading-tight">
                 {headline.line3}
               </h1>
             )}
           </div>
 
-          <div className="max-w-3xl mx-auto animate-fade-in-up animation-delay-600">
-            <p className="text-lg md:text-xl lg:text-2xl text-orange-100/90 font-light leading-relaxed">
+          <div className="max-w-3xl mx-auto animate-fade-in-up animation-delay-600 mb-8">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-orange-100/90 font-light leading-relaxed">
               {subtitle}
             </p>
           </div>
 
           {buttons && (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10 animate-fade-in-up animation-delay-800">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-800">
               {buttons.primary && (
                 <button
                   onClick={buttons.primary.onClick}
-                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-black rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/25"
+                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-black rounded-full font-semibold text-base sm:text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/25"
                 >
                   {buttons.primary.text}
                 </button>
@@ -344,7 +356,7 @@ const AnimatedShaderHero: React.FC<HeroProps> = ({
               {buttons.secondary && (
                 <button
                   onClick={buttons.secondary.onClick}
-                  className="px-8 py-4 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-300/30 hover:border-orange-300/50 text-orange-100 rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 backdrop-blur-sm"
+                  className="px-8 py-4 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-300/30 hover:border-orange-300/50 text-orange-100 rounded-full font-semibold text-base sm:text-lg transition-all duration-300 hover:scale-105 backdrop-blur-sm"
                 >
                   {buttons.secondary.text}
                 </button>
@@ -353,16 +365,16 @@ const AnimatedShaderHero: React.FC<HeroProps> = ({
           )}
 
           {note && (
-            <p className="text-sm text-orange-100/40 animate-fade-in-up animation-delay-800 -mt-2">
+            <p className="text-xs sm:text-sm text-orange-100/40 animate-fade-in-up animation-delay-800 mt-3">
               {note}
             </p>
           )}
         </div>
 
         {identity && (
-          <div className="mt-12 pt-8 border-t border-white/10 animate-fade-in-up animation-delay-800">
-            <p className="text-xl font-bold text-white mb-1">{identity.name}</p>
-            <p className="text-sm text-orange-200/60">{identity.title}</p>
+          <div className="mt-10 pt-6 border-t border-white/10 animate-fade-in-up animation-delay-800 text-center">
+            <p className="text-base sm:text-xl font-bold text-white mb-1">{identity.name}</p>
+            <p className="text-xs sm:text-sm text-orange-200/60">{identity.title}</p>
           </div>
         )}
       </div>
