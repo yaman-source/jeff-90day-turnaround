@@ -119,14 +119,11 @@ const problems = [
   },
 ];
 
-// ─── Offer cards ──────────────────────────────────────────────────────────────
+// ─── Offer cards (no pricing — investment determined after discovery call) ────
 const offers = [
   {
     name: "Growth Accelerator Advisory",
     tag: "Ongoing Strategic Advisory",
-    price: "$2,000 – $3,000",
-    pricePeriod: "/month",
-    priceNote: "90-day minimum commitment",
     desc: "Ongoing strategic guidance and accountability for founders who need a seasoned operator's perspective on the big moves without full hands-on engagement.",
     features: [
       "Strategic guidance & decision support",
@@ -134,16 +131,15 @@ const offers = [
       "Expansion planning",
       "Team coaching",
     ],
-    note: "90-day minimum. Bundleable with AI Leverage Implementation.",
+    qualifies: [] as string[],
+    investmentLine: "Monthly rate — TBD after discovery call",
+    note: "Bundleable with AI Leverage Implementation.",
     icon: "M22 12h-4l-3 9L9 3l-3 9H2",
     featured: false,
   },
   {
     name: "90-Day Turnaround Sprint",
     tag: "Flagship Engagement",
-    price: "$21,000 – $33,000",
-    pricePeriod: "",
-    priceNote: "90-Day Package",
     desc: "Our team works inside your business — full hands-on engagement, not coaching from the sidelines. From discovery through locked-in momentum.",
     features: [
       "Business diagnostic & bottleneck analysis",
@@ -154,16 +150,15 @@ const offers = [
       "Execution coaching & hands-on support",
       "AI workflow opportunities audit",
     ],
-    note: "50% upfront, 50% in Month 2.",
+    qualifies: [] as string[],
+    investmentLine: "Package price — determined after discovery call",
+    note: "Priced as a complete 90-day bundled engagement.",
     icon: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",
     featured: true,
   },
   {
     name: "AI Leverage Implementation",
     tag: "AI Systems & Automation",
-    price: "$4,000 – $10,000",
-    pricePeriod: "/month",
-    priceNote: "Based on complexity and scope",
     desc: "We identify and implement AI-powered systems that save time, reduce cost, and create real leverage inside your business.",
     features: [
       "Sales follow-up automation",
@@ -172,8 +167,38 @@ const offers = [
       "AI assistants & internal GPT tools",
       "Reporting automation",
     ],
-    note: "Scope and investment determined after discovery call.",
+    qualifies: [] as string[],
+    investmentLine: "To be determined after discovery call",
+    note: "",
     icon: "M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18",
+    featured: false,
+  },
+  {
+    name: "Expansion Readiness Blueprint",
+    tag: "Franchise & Multi-Unit Growth",
+    desc: "For founder-led businesses ready to scale through franchising, multi-unit expansion, acquisitions, or structured geographic growth.",
+    features: [
+      "Expansion readiness diagnostic",
+      "Business model and unit economics review",
+      "Founder dependency and scalability assessment",
+      "Systems, SOP, and operational repeatability review",
+      "Leadership team readiness evaluation",
+      "Franchise / licensing / corporate expansion pathway analysis",
+      "Growth model decision framework",
+      "Expansion roadmap with priorities, milestones, and execution strategy",
+      "KPI and support model planning",
+      "Optional implementation advisory for rollout execution",
+    ],
+    qualifies: [
+      "Is my business actually ready to scale?",
+      "Should we franchise, license, expand corporately, or grow through acquisition?",
+      "What breaks if we try to scale right now?",
+      "How do we grow without becoming the bottleneck?",
+      "What needs to be built before expansion?",
+    ],
+    investmentLine: "Investment determined after discovery call",
+    note: "",
+    icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10",
     featured: false,
   },
 ];
@@ -185,8 +210,6 @@ const emptyForm = {
   email: "",
   company: "",
   website: "",
-  revenue: "",
-  employees: "",
   challenge: "",
   service: "",
   timeline: "",
@@ -269,7 +292,7 @@ export default function Home() {
           onClick={() => scrollTo("qualify")}
           className="bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-sm px-5 py-2.5 rounded-[6px] transition-colors duration-200"
         >
-          See If You Qualify
+          Book a Discovery Call
         </button>
       </nav>
 
@@ -289,7 +312,7 @@ export default function Home() {
         subtitle="You've built something real — but growth has stalled, chaos is creeping in, and you're doing too much yourself. 90 days is all it takes to change that."
         buttons={{
           primary: {
-            text: "See If You Qualify",
+            text: "Book a Discovery Call",
             onClick: () => scrollTo("qualify"),
           },
           secondary: {
@@ -310,9 +333,9 @@ export default function Home() {
       <div className="bg-[#111827] border-y border-[#C87941]/15">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4">
           {[
-            { num: "30+", label: "Years Operating at VP Level & Above" },
-            { num: "$7M→$47M", label: "Revenue Growth Driven" },
-            { num: "$20M", label: "Business Built & Operated Personally" },
+            { num: "30+", label: "Years of C-Suite Experience" },
+            { num: "$7M→$47M", label: "Revenue Growth in Two Years" },
+            { num: "$20M+", label: "Business Built, Scaled & Exited" },
             { num: "90-Day", label: "Locked-In Momentum Framework" },
           ].map((s, i) => (
             <FadeUp key={s.num} delay={i * 0.08}>
@@ -394,7 +417,7 @@ export default function Home() {
                   onClick={() => scrollTo("qualify")}
                   className="w-full bg-[#C87941] hover:bg-[#b06830] text-white font-bold py-4 rounded-[6px] transition-colors duration-200 text-center"
                 >
-                  See If You Qualify →
+                  Book a Discovery Call →
                 </button>
               </div>
             </FadeUp>
@@ -403,7 +426,7 @@ export default function Home() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          ANIMATED PATHS CTA — inspired by uniquesonu/modern-background-paths
+          ANIMATED PATHS CTA
       ════════════════════════════════════════════════════════════════ */}
       <section className="relative py-32 px-6 bg-[#111827] overflow-hidden">
         {/* Animated SVG path background */}
@@ -491,7 +514,7 @@ export default function Home() {
               The Decision Point
             </span>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] mb-6">
-              You Can Keep Running on Empty —
+              You Can Keep Running on Empty
               <br />
               <span className="text-[#C87941]">Or Change Everything in 90 Days.</span>
             </h2>
@@ -500,13 +523,12 @@ export default function Home() {
               the ones whose founders were willing to stop, fix what&apos;s broken, and execute
               with intention. That&apos;s what we build together.
             </p>
-            {/* NeonButton from cybergaz/neon-button */}
             <NeonButton
               size="lg"
               className="text-[16px] border-[#C87941]/60 text-[#C87941] hover:border-[#C87941] px-14 py-4 rounded-[6px]"
               onClick={() => scrollTo("qualify")}
             >
-              See If You Qualify
+              Book a Discovery Call
             </NeonButton>
           </FadeUp>
         </div>
@@ -516,21 +538,21 @@ export default function Home() {
           OFFERS / SERVICES
       ════════════════════════════════════════════════════════════════ */}
       <section id="offers" className="py-28 px-6 bg-[#0D0D0D]">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-[1600px] mx-auto">
           <FadeUp className="text-center mb-16">
             <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">
-              Three Ways to Work With Us
+              Four Ways to Work With Us
             </span>
             <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
               Choose Your Engagement Level
             </h2>
             <p className="text-[#9CA3AF] text-lg max-w-xl mx-auto leading-relaxed">
-              From full hands-on execution to a focused standalone audit — there&apos;s a model
+              From full hands-on execution to a focused standalone blueprint — there&apos;s a model
               built for where you are right now.
             </p>
           </FadeUp>
 
-          <div className="grid lg:grid-cols-3 gap-6 items-start">
+          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
             {offers.map((offer, i) => (
               <FadeUp key={offer.name} delay={i * 0.1}>
                 <div
@@ -567,15 +589,11 @@ export default function Home() {
                     {offer.tag}
                   </p>
 
-                  {/* Price */}
+                  {/* Investment line */}
                   <div className="mb-5 pb-5 border-b border-white/[0.06]">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-white">{offer.price}</span>
-                      {offer.pricePeriod && (
-                        <span className="text-[#9CA3AF] text-sm">{offer.pricePeriod}</span>
-                      )}
-                    </div>
-                    <p className="text-[12px] text-[#C87941] mt-1">{offer.priceNote}</p>
+                    <p className="text-[13px] text-[#C87941]/80 italic">
+                      {offer.investmentLine}
+                    </p>
                   </div>
 
                   <p className="text-[14px] text-[#9CA3AF] leading-relaxed mb-6">{offer.desc}</p>
@@ -589,9 +607,28 @@ export default function Home() {
                     ))}
                   </ul>
 
-                  <div className="border-t border-white/[0.06] pt-5 mb-6">
-                    <p className="text-[12px] text-[#4A5568] leading-relaxed">{offer.note}</p>
-                  </div>
+                  {/* "This is right for you if..." — only on 4th card */}
+                  {offer.qualifies.length > 0 && (
+                    <div className="mb-6 p-4 rounded-lg bg-[#C87941]/[0.06] border border-[#C87941]/20">
+                      <p className="text-[11px] font-bold uppercase tracking-[1.2px] text-[#C87941] mb-3">
+                        This is right for you if…
+                      </p>
+                      <ul className="space-y-2">
+                        {offer.qualifies.map((q) => (
+                          <li key={q} className="flex items-start gap-2 text-[13px] text-[#9CA3AF]">
+                            <CheckIcon />
+                            {q}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {offer.note ? (
+                    <div className="border-t border-white/[0.06] pt-5 mb-6">
+                      <p className="text-[12px] text-[#4A5568] leading-relaxed">{offer.note}</p>
+                    </div>
+                  ) : <div className="mb-6" />}
 
                   <button
                     onClick={() => scrollTo("qualify")}
@@ -601,12 +638,30 @@ export default function Home() {
                         : "border border-[#C87941]/40 text-[#C87941] hover:bg-[#C87941]/10"
                     }`}
                   >
-                    See If You Qualify →
+                    Book a Discovery Call →
                   </button>
                 </div>
               </FadeUp>
             ))}
           </div>
+
+          {/* Progression line */}
+          <FadeUp delay={0.2}>
+            <div className="mt-16 text-center">
+              <div className="flex flex-wrap items-center justify-center gap-2 text-lg md:text-xl font-black mb-3">
+                <span className="text-[#C87941]">Stabilize</span>
+                <span className="text-[#C87941]/40">→</span>
+                <span className="text-[#C87941]">Strengthen</span>
+                <span className="text-[#C87941]/40">→</span>
+                <span className="text-[#C87941]">Leverage</span>
+                <span className="text-[#C87941]/40">→</span>
+                <span className="text-[#C87941]">Scale</span>
+              </div>
+              <p className="text-[14px] text-[#4A5568]">
+                A complete system — not a collection of consulting services.
+              </p>
+            </div>
+          </FadeUp>
         </div>
       </section>
 
@@ -669,7 +724,7 @@ export default function Home() {
       <section className="py-28 px-6 bg-[#0D0D0D]">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-[360px_1fr] gap-20 items-center">
-            {/* Photo placeholder */}
+            {/* Photo */}
             <FadeUp>
               <div className="relative">
                 <div className="w-full aspect-[3/4] rounded-xl overflow-hidden border border-white/[0.07]">
@@ -685,9 +740,9 @@ export default function Home() {
                     30+
                   </strong>
                   <span className="text-[12px] text-[#9CA3AF] leading-snug block mt-1">
-                    Years at VP
+                    Years of C-Suite
                     <br />
-                    Level &amp; Above
+                    Experience
                   </span>
                 </div>
               </div>
@@ -704,24 +759,43 @@ export default function Home() {
                 <span className="text-[#C87941]">Inside Out.</span>
               </h2>
 
-              {[
-                "Jeff Lawrence is the founder of 90 Day Turnaround. For over 30 years he has operated at VP level and above inside major corporations and publicly traded companies — and built and scaled his own business to $20M+ before rebuilding it from scratch.",
-                "He has driven revenue growth from $7M to $47M inside client businesses, survived cancer, lost over 100 pounds, and now runs marathons. He brings the same discipline to business turnarounds that he brings to the trail.",
-                "Jeff leads the 90 Day Turnaround team — a network of fractional operators, CFOs, HR leaders, and growth specialists — to bring the right expertise to every engagement.",
-              ].map((para, i) => (
-                <p key={i} className="text-[16px] text-[#9CA3AF] leading-[1.82] mb-4">
-                  {para}
-                </p>
-              ))}
+              <p className="text-[16px] text-[#9CA3AF] leading-[1.82] mb-4">
+                Jeff Lawrence is the founder of 90 Day Turnaround, a business advisory and coaching
+                firm built to help owner-led companies regain clarity, traction, and momentum.
+              </p>
+              <p className="text-[16px] text-[#9CA3AF] leading-[1.82] mb-4">
+                With more than 30 years of experience operating at the owner, founder, and executive
+                leadership level, Jeff brings real-world business experience to every engagement. He
+                has built, scaled, and exited his own franchise-based business, growing it to more
+                than $20 million in annual revenue, and has helped drive rapid expansion through both
+                acquisitions and organic growth, including scaling revenue from $7 million to $47
+                million in just two years.
+              </p>
+              <p className="text-[16px] text-[#9CA3AF] leading-[1.82] mb-4">
+                Jeff&apos;s approach is practical, direct, and execution-focused. As a cancer
+                survivor who transformed his personal health from over 300 pounds to running
+                marathons, extreme skiing, and completing multi-day adventure hikes, he understands
+                what it takes to rebuild, refocus, and push through difficult seasons. He brings that
+                same discipline, resilience, and action-oriented mindset to business turnarounds.
+              </p>
+              <p className="text-[16px] text-[#9CA3AF] leading-[1.82] mb-4">
+                Through 90 Day Turnaround, Jeff leads a network of fractional operators, CFOs, HR
+                leaders, growth specialists, and strategic advisors, bringing the right expertise to
+                each client based on their specific challenges, goals, and stage of growth. His
+                mission is simple: help business owners create measurable progress in 90 days by
+                aligning strategy, leadership, operations, and execution.
+              </p>
 
               <div className="flex flex-wrap gap-2.5 mt-8">
                 {[
                   ["30+", "Years Experience"],
                   ["$7M→$47M", "Growth Driven"],
-                  ["$20M", "Business Run"],
+                  ["$20M+", "Business Exited"],
                   ["VP Level & Above", ""],
                   ["Cancer Survivor", ""],
                   ["Marathon Runner", ""],
+                  ["Extreme Skier", ""],
+                  ["Adventure Hiker", ""],
                 ].map(([val, label]) => (
                   <span
                     key={val}
@@ -752,7 +826,7 @@ export default function Home() {
               Apply for a Discovery Call
             </span>
             <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
-              See If You Qualify
+              Let&apos;s Start the Conversation
             </h2>
             <p className="text-[#9CA3AF] text-lg max-w-lg mx-auto leading-relaxed">
               Jeff works with a limited number of businesses at a time. Complete the form below
@@ -767,7 +841,7 @@ export default function Home() {
                 noValidate
                 className="grid grid-cols-1 sm:grid-cols-2 gap-5"
               >
-                {/* First / Last name */}
+                {/* Name / Email / Company / Website */}
                 {(
                   [
                     { id: "fname", label: "First Name", type: "text", placeholder: "Jeff", col: 1 },
@@ -797,62 +871,6 @@ export default function Home() {
                           : "border-white/10"
                       }`}
                     />
-                  </div>
-                ))}
-
-                {/* Dropdowns */}
-                {(
-                  [
-                    {
-                      id: "revenue",
-                      label: "Annual Revenue Range",
-                      options: [
-                        { v: "under-2m", l: "Under $2M" },
-                        { v: "2m-5m", l: "$2M – $5M" },
-                        { v: "5m-10m", l: "$5M – $10M" },
-                        { v: "10m-25m", l: "$10M – $25M" },
-                        { v: "over-25m", l: "Over $25M" },
-                      ],
-                    },
-                    {
-                      id: "employees",
-                      label: "Number of Employees",
-                      options: [
-                        { v: "under-10", l: "Under 10" },
-                        { v: "10-50", l: "10 – 50" },
-                        { v: "50-150", l: "50 – 150" },
-                        { v: "over-150", l: "Over 150" },
-                      ],
-                    },
-                  ] as const
-                ).map((f) => (
-                  <div key={f.id}>
-                    <label
-                      htmlFor={f.id}
-                      className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2"
-                    >
-                      {f.label} <span className="text-[#C87941]">*</span>
-                    </label>
-                    <select
-                      id={f.id}
-                      name={f.id}
-                      value={form[f.id]}
-                      onChange={handleChange}
-                      className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] text-white outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] appearance-none cursor-pointer color-scheme-dark ${
-                        errors[f.id]
-                          ? "border-red-500"
-                          : "border-white/10"
-                      } ${form[f.id] === "" ? "text-[#4A5568]" : "text-white"}`}
-                    >
-                      <option value="" disabled>
-                        Select…
-                      </option>
-                      {f.options.map((o) => (
-                        <option key={o.v} value={o.v}>
-                          {o.l}
-                        </option>
-                      ))}
-                    </select>
                   </div>
                 ))}
 
@@ -888,6 +906,7 @@ export default function Home() {
                         { v: "90-day-turnaround-sprint", l: "90-Day Turnaround Sprint" },
                         { v: "growth-accelerator-advisory", l: "Growth Accelerator Advisory" },
                         { v: "ai-leverage-implementation", l: "AI Leverage Implementation" },
+                        { v: "expansion-readiness-blueprint", l: "Expansion Readiness Blueprint" },
                         { v: "not-sure", l: "Not sure yet" },
                       ],
                     },
@@ -966,7 +985,7 @@ export default function Home() {
                     type="submit"
                     className="w-full bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[16px] py-5 rounded-[6px] transition-colors duration-200"
                   >
-                    See If You Qualify →
+                    Book a Discovery Call →
                   </button>
                   <p className="text-[13px] text-[#4A5568] text-center">
                     Our team reviews every application personally and will reach out within
@@ -1034,14 +1053,6 @@ export default function Home() {
               jeff@90dayturnaround.ca
             </a>
             <a
-              href="https://90dayturnaround.ca"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[14px] text-[#9CA3AF] hover:text-[#C87941] transition-colors"
-            >
-              90dayturnaround.ca
-            </a>
-            <a
               href="https://linkedin.com/in/jtsales"
               target="_blank"
               rel="noopener noreferrer"
@@ -1053,7 +1064,7 @@ export default function Home() {
               onClick={() => scrollTo("qualify")}
               className="text-[14px] text-[#9CA3AF] hover:text-[#C87941] transition-colors"
             >
-              See If You Qualify
+              Book a Discovery Call
             </button>
           </nav>
           <p className="text-[13px] text-[#4A5568]">
