@@ -787,7 +787,7 @@ export default function Home() {
                 your discovery call.
               </p>
               <a
-                href="https://calendly.com/jt-sales"
+                href="https://calendly.com/jt-sales/30min"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[16px] px-12 py-5 rounded-[6px] transition-colors duration-200"
