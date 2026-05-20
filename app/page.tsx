@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import AnimatedShaderHero from "@/components/ui/animated-shader-hero";
-import { NeonButton } from "@/components/ui/neon-button";
 
 // ─── Lightweight CSS fade-up (no framer-motion, single IntersectionObserver) ──
 const _observer =
@@ -394,13 +393,12 @@ export default function Home() {
               the ones whose founders were willing to stop, fix what&apos;s broken, and execute
               with intention. That&apos;s what we build together.
             </p>
-            <NeonButton
-              size="lg"
-              className="text-[16px] border-[#C87941]/60 text-[#C87941] hover:border-[#C87941] px-14 py-4 rounded-[6px]"
+            <button
               onClick={() => scrollTo("qualify")}
+              className="bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[16px] px-14 py-4 rounded-[6px] transition-colors duration-200"
             >
               Book a Discovery Call
-            </NeonButton>
+            </button>
           </FadeUp>
         </div>
       </section>
@@ -477,7 +475,7 @@ export default function Home() {
 
                   <button
                     onClick={() => scrollTo("qualify")}
-                    className={`w-full py-3.5 rounded-[6px] font-bold text-sm transition-colors duration-200 ${offer.featured ? "bg-[#C87941] hover:bg-[#b06830] text-white" : "border border-[#C87941]/40 text-[#C87941] hover:bg-[#C87941]/10"}`}
+                    className="w-full py-3.5 rounded-[6px] font-bold text-sm transition-colors duration-200 bg-[#C87941] hover:bg-[#b06830] text-white"
                   >
                     Book a Discovery Call
                   </button>
@@ -817,7 +815,7 @@ export default function Home() {
             <a href="https://linkedin.com/in/jtsales" target="_blank" rel="noopener noreferrer" className="text-[14px] text-[#9CA3AF] hover:text-[#C87941] transition-colors">
               LinkedIn
             </a>
-            <button onClick={() => scrollTo("qualify")} className="text-[14px] text-[#9CA3AF] hover:text-[#C87941] transition-colors">
+            <button onClick={() => scrollTo("qualify")} className="bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[14px] px-5 py-2.5 rounded-[6px] transition-colors duration-200">
               Book a Discovery Call
             </button>
           </nav>
