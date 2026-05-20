@@ -610,9 +610,9 @@ export default function Home() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          TESTIMONIALS PLACEHOLDER
+          TESTIMONIALS PLACEHOLDER — hidden until real content is ready
       ════════════════════════════════════════════════════════════════ */}
-      <section className="py-24 px-6 bg-[#111827]">
+      {/* <section className="py-24 px-6 bg-[#111827]">
         <div className="max-w-6xl mx-auto">
           <FadeUp className="text-center mb-14">
             <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">
@@ -645,7 +645,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ════════════════════════════════════════════════════════════════
           INTAKE FORM
