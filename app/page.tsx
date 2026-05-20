@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import AnimatedShaderHero from "@/components/ui/animated-shader-hero";
+import LampHero from "@/components/ui/lamp-hero";
 
 // ─── Lightweight CSS fade-up (no framer-motion, single IntersectionObserver) ──
 const _observer =
@@ -264,8 +264,7 @@ export default function Home() {
       {/* ════════════════════════════════════════════════════════════════
           HERO
       ════════════════════════════════════════════════════════════════ */}
-      <AnimatedShaderHero
-        trustBadge={{ text: "Western Canada's Business Turnaround Specialist", icons: ["✦"] }}
+      <LampHero
         headline={{ line1: "Your Business", line2: "Has Hit a Ceiling.", line3: "Let's Break Through It." }}
         subtitle="You've built something real, but growth has stalled, chaos is creeping in, and you're doing too much yourself. 90 days is all it takes to change that."
         buttons={{
