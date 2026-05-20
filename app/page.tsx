@@ -230,6 +230,7 @@ export default function Home() {
       return;
     }
     setSubmitted(true);
+    window.open("https://calendly.com/jt-sales/30min", "_blank");
   };
 
   return (
