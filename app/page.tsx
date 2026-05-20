@@ -231,6 +231,12 @@ export default function Home() {
     }
     setSubmitted(true);
     window.open("https://calendly.com/jt-sales/30min", "_blank");
+    // Fire-and-forget: save to HubSpot + send email notification
+    fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    }).catch(() => {/* silent — UX is never blocked by API errors */});
   };
 
   return (
