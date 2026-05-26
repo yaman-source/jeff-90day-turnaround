@@ -26,36 +26,64 @@ export async function POST(req: NextRequest) {
   const payload = body.payload as Record<string, unknown> | null | undefined;
   console.log("🔑 Payload keys:", payload ? Object.keys(payload) : "null/undefined");
 
-  const invitee = payload?.invitee as Record<string, unknown> | undefined;
-  const meeting = payload?.event   as Record<string, unknown> | undefined;
+  // Calendly v2 API webhooks: payload.invitee and payload.event may be
+  // inline objects OR URI strings depending on the webhook format.
+  const inviteeRaw = payload?.invitee;
+  const invitee = typeof inviteeRaw === "object" && inviteeRaw !== null
+    ? (inviteeRaw as Record<string, unknown>)
+    : undefined;
 
-  // questions_and_answers array — Calendly may put email/name here instead of
-  // (or in addition to) the invitee object, depending on the account plan/config.
+  const eventRaw = payload?.event;
+  const meeting = typeof eventRaw === "object" && eventRaw !== null
+    ? (eventRaw as Record<string, unknown>)
+    : undefined;
+
+  // questions_and_answers — array format: [{question, answer}, ...]
   const qas = (payload?.questions_and_answers ?? []) as Array<{ question: string; answer: string }>;
-  console.log("🔑 QAs count:", qas.length, "| invitee.email:", invitee?.email ?? "null");
 
-  // Try invitee object first, fall back to questions_and_answers
+  // questions_and_responses — flat format: {"1_question": "Email", "1_response": "...", ...}
+  // This is how Calendly v2 API webhooks store standard fields when invitee is a URI reference.
+  const qrs = (payload?.questions_and_responses ?? {}) as Record<string, string>;
+
+  // Search questions_and_responses for a keyword (e.g. "email", "name")
+  const findInQRS = (keyword: RegExp): string => {
+    const keys = Object.keys(qrs);
+    for (const key of keys) {
+      if (key.endsWith("_question") && keyword.test(qrs[key] ?? "")) {
+        return qrs[key.replace("_question", "_response")] ?? "";
+      }
+    }
+    return "";
+  };
+
+  console.log("🔑 QAs count:", qas.length, "| QRS keys:", Object.keys(qrs).length,
+              "| invitee type:", typeof inviteeRaw, "| event type:", typeof eventRaw);
+
+  // Extract email — try all possible locations
   const emailRaw =
     (invitee?.email as string | null | undefined) ||
     qas.find(qa => /email/i.test(qa.question ?? ""))?.answer ||
+    findInQRS(/email/i) ||
     "";
-  const email    = emailRaw.trim().toLowerCase();
+  const email = emailRaw.trim().toLowerCase();
 
+  // Extract name — try all possible locations
   const name =
     (invitee?.name as string) ||
     `${(invitee?.first_name as string) || ""} ${(invitee?.last_name as string) || ""}`.trim() ||
-    qas.find(qa => /name/i.test(qa.question ?? ""))?.answer ||
+    qas.find(qa => /^name$/i.test(qa.question ?? ""))?.answer ||
+    findInQRS(/name/i) ||
     "Unknown";
 
   const timezone  = (invitee?.timezone as string) || "";
   const startTime = (meeting?.start_time as string) || "";
   const endTime   = (meeting?.end_time   as string) || "";
 
-  console.log("📌 Extracted — name:", name, "| email:", email, "| start:", startTime);
+  console.log("📌 Extracted — name:", name, "| email:", email, "| start:", startTime || "(no inline time)");
 
-  // ── Guard: completely empty payload = Calendly test ping on webhook creation ─
-  if (!email && !startTime && name === "Unknown") {
-    console.log("⚠️ Empty payload — Calendly test ping, skipping");
+  // ── Guard: skip only if we have absolutely nothing useful (true test ping) ───
+  if (!email && name === "Unknown") {
+    console.log("⚠️ No usable data — Calendly test ping, skipping");
     return NextResponse.json({ ok: true, skipped: true, reason: "empty_payload" });
   }
 
