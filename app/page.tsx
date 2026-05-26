@@ -178,9 +178,18 @@ const offers = [
   },
 ];
 
+// ─── Form initial state ───────────────────────────────────────────────────────
+const emptyForm = {
+  fname: "", lname: "", email: "", company: "",
+  website: "", challenge: "", service: "", timeline: "", referral: "",
+};
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Home() {
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled,  setScrolled]  = useState(false);
+  const [step,      setStep]      = useState<"form" | "calendar">("form");
+  const [form,      setForm]      = useState(emptyForm);
+  const [errors,    setErrors]    = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let rafId = 0;
@@ -192,8 +201,144 @@ export default function Home() {
     return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(rafId); };
   }, []);
 
+  // ── Initialize Calendly inline widget — all data passed via URL params ───────
+  useEffect(() => {
+    if (step !== "calendar") return;
+
+    // Map slug values → human-readable labels so Calendly text fields show
+    // proper sentences instead of raw slugs.
+    const serviceLabel: Record<string, string> = {
+      "90-day-turnaround-sprint":      "90-Day Turnaround Sprint",
+      "growth-accelerator-advisory":   "Growth Accelerator Advisory",
+      "ai-leverage-implementation":    "AI Leverage Implementation",
+      "expansion-readiness-blueprint": "Expansion Readiness Blueprint",
+      "not-sure":                      "Not sure yet",
+    };
+    const timelineLabel: Record<string, string> = {
+      "immediately": "Immediately",
+      "30-days":     "Within 30 days",
+      "90-days":     "Within 90 days",
+      "exploring":   "Just exploring",
+    };
+    const referralLabel: Record<string, string> = {
+      "linkedin":  "LinkedIn",
+      "referral":  "Referral",
+      "google":    "Google",
+      "other":     "Other",
+    };
+
+    // Build URL using encodeURIComponent (spaces → %20, not +).
+    // URLSearchParams encodes spaces as + which Calendly shows literally.
+    const p = (k: string, v: string) =>
+      `${encodeURIComponent(k)}=${encodeURIComponent(v)}`;
+
+    const calendlyUrl = [
+      "https://calendly.com/jt-sales/30min",
+      "?",
+      [
+        p("background_color", "0D0D0D"),
+        p("text_color",       "FFFFFF"),
+        p("primary_color",    "C87941"),
+        p("hide_gdpr_banner", "1"),
+        p("name",  `${form.fname} ${form.lname}`.trim()),
+        p("email", form.email),
+        p("a1",    form.company),
+        p("a2",    form.website),
+        p("a3",    form.challenge),
+        p("a4",    serviceLabel[form.service]  ?? form.service),
+        p("a5",    timelineLabel[form.timeline] ?? form.timeline),
+        p("a6",    referralLabel[form.referral] ?? form.referral),
+      ].join("&"),
+    ].join("");
+
+    const init = () => {
+      const w = window as typeof window & {
+        Calendly?: { initInlineWidget: (o: unknown) => void };
+      };
+      if (!w.Calendly) return;
+      const container = document.getElementById("calendly-container");
+      if (!container) return;
+      // Clear any previous widget render before re-initialising
+      container.innerHTML = "";
+      w.Calendly.initInlineWidget({
+        url: calendlyUrl,
+        parentElement: container,
+      });
+    };
+
+    // Small delay ensures the calendly-container DOM node is painted
+    const timer = setTimeout(() => {
+      const w = window as typeof window & { Calendly?: unknown };
+      if (w.Calendly) {
+        init();
+      } else {
+        const existing = document.querySelector('script[src*="calendly"]');
+        if (existing) {
+          existing.addEventListener("load", init, { once: true });
+        } else {
+          const s = document.createElement("script");
+          s.src = "https://assets.calendly.com/assets/external/widget.js";
+          s.onload = init;
+          document.body.appendChild(s);
+        }
+      }
+    }, 120);
+
+    // ── Listen for Calendly booking completion (browser-side event) ──────────
+    // Fires the moment user confirms their slot inside the Calendly widget.
+    // We use the Step 1 form data (already captured) to send Jeff a
+    // "Call Booked" notification email directly — no webhook needed.
+    const handleCalendlyEvent = (e: MessageEvent) => {
+      if (e.data?.event === "calendly.event_scheduled") {
+        fetch("/api/booking-notification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        }).catch(() => {});
+      }
+    };
+    window.addEventListener("message", handleCalendlyEvent);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("message", handleCalendlyEvent);
+    };
+  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const scrollTo = (id: string) =>
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ) => {
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    setErrors((err) => ({ ...err, [e.target.name]: false }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: Record<string, boolean> = {};
+    Object.entries(form).forEach(([k, v]) => { if (!v.trim()) newErrors[k] = true; });
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
+      document.getElementById(Object.keys(newErrors)[0])
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    // Save to HubSpot + send pre-notification email (fire-and-forget)
+    fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    }).catch(() => {});
+    // Switch to calendar step
+    setStep("calendar");
+    setTimeout(
+      () => document.getElementById("qualify")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      80,
+    );
+  };
 
   return (
     <main className="bg-[#0D0D0D] text-white" style={{ overflowX: "clip" }}>
@@ -717,34 +862,176 @@ export default function Home() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          CALENDLY BOOKING
+          BOOKING — STEP 1: FORM  /  STEP 2: CALENDLY
       ════════════════════════════════════════════════════════════════ */}
       <section id="qualify" className="py-28 px-6 bg-[#0D0D0D]">
         <div className="max-w-[780px] mx-auto">
-          <FadeUp className="text-center mb-14">
-            <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">
-              Book a Discovery Call
-            </span>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
-              Let&apos;s Start the Conversation
-            </h2>
-            <p className="text-[#9CA3AF] text-lg max-w-lg mx-auto leading-relaxed">
-              Jeff works with a limited number of businesses at a time. Pick a time below and
-              tell us a bit about where you are — we&apos;ll make the most of our 30 minutes together.
-            </p>
+
+          {/* ── Step indicator ───────────────────────────────────────── */}
+          <FadeUp className="flex items-center justify-center gap-3 mb-12">
+            {(["Tell us about you", "Pick your time"] as const).map((label, i) => {
+              const active = (i === 0 && step === "form") || (i === 1 && step === "calendar");
+              const done   = i === 0 && step === "calendar";
+              return (
+                <div key={label} className="flex items-center gap-3">
+                  {i > 0 && <div className="w-10 h-px bg-white/10" />}
+                  <div className="flex items-center gap-2">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold transition-colors duration-300 ${active ? "bg-[#C87941] text-white" : done ? "bg-[#C87941]/30 text-[#C87941]" : "bg-white/[0.07] text-[#4A5568]"}`}>
+                      {done
+                        ? <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        : i + 1}
+                    </div>
+                    <span className={`text-[13px] font-semibold hidden sm:block transition-colors duration-300 ${active ? "text-white" : "text-[#4A5568]"}`}>{label}</span>
+                  </div>
+                </div>
+              );
+            })}
           </FadeUp>
 
-          <FadeUp delay={0.1}>
-            <div
-              className="calendly-inline-widget rounded-xl overflow-hidden border border-white/[0.07]"
-              data-url="https://calendly.com/jt-sales/30min?background_color=0D0D0D&text_color=FFFFFF&primary_color=C87941"
-              style={{ minWidth: "320px", height: "700px" }}
-            />
-            <Script
-              src="https://assets.calendly.com/assets/external/widget.js"
-              strategy="lazyOnload"
-            />
-          </FadeUp>
+          {step === "form" ? (
+            <>
+              <FadeUp className="text-center mb-14">
+                <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">
+                  Apply for a Discovery Call
+                </span>
+                <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
+                  Let&apos;s Start the Conversation
+                </h2>
+                <p className="text-[#9CA3AF] text-lg max-w-lg mx-auto leading-relaxed">
+                  Jeff works with a limited number of businesses at a time. Tell us about yourself
+                  first — then you&apos;ll pick a time that works for you.
+                </p>
+              </FadeUp>
+
+              <FadeUp delay={0.1}>
+                <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {(
+                    [
+                      { id: "fname",   label: "First Name",       type: "text",  placeholder: "Jeff",                    col: 1 },
+                      { id: "lname",   label: "Last Name",        type: "text",  placeholder: "Lawrence",                col: 1 },
+                      { id: "email",   label: "Business Email",   type: "email", placeholder: "you@yourcompany.com",     col: 1 },
+                      { id: "company", label: "Company Name",     type: "text",  placeholder: "Acme Corp.",              col: 1 },
+                      { id: "website", label: "Company Website",  type: "url",   placeholder: "https://yourcompany.com", col: 2 },
+                    ] as const
+                  ).map((f) => (
+                    <div key={f.id} className={f.col === 2 ? "sm:col-span-2" : ""}>
+                      <label htmlFor={f.id} className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
+                        {f.label} <span className="text-[#C87941]">*</span>
+                      </label>
+                      <input
+                        id={f.id} name={f.id} type={f.type} placeholder={f.placeholder}
+                        value={form[f.id]} onChange={handleChange}
+                        className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] text-white placeholder:text-[#4A5568] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] ${errors[f.id] ? "border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.13)]" : "border-white/10"}`}
+                      />
+                    </div>
+                  ))}
+
+                  <div className="sm:col-span-2">
+                    <label htmlFor="challenge" className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
+                      What is your biggest challenge right now? <span className="text-[#C87941]">*</span>
+                    </label>
+                    <textarea
+                      id="challenge" name="challenge" rows={4}
+                      placeholder="Be specific — what's the thing keeping you up at night?"
+                      value={form.challenge} onChange={handleChange}
+                      className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] text-white placeholder:text-[#4A5568] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] resize-y ${errors.challenge ? "border-red-500" : "border-white/10"}`}
+                    />
+                  </div>
+
+                  {(
+                    [
+                      {
+                        id: "service",
+                        label: "Which service are you most interested in?",
+                        options: [
+                          { v: "90-day-turnaround-sprint",     l: "90-Day Turnaround Sprint" },
+                          { v: "growth-accelerator-advisory",  l: "Growth Accelerator Advisory" },
+                          { v: "ai-leverage-implementation",   l: "AI Leverage Implementation" },
+                          { v: "expansion-readiness-blueprint",l: "Expansion Readiness Blueprint" },
+                          { v: "not-sure",                     l: "Not sure yet" },
+                        ],
+                      },
+                      {
+                        id: "timeline",
+                        label: "What is your timeline?",
+                        options: [
+                          { v: "immediately", l: "Immediately" },
+                          { v: "30-days",     l: "Within 30 days" },
+                          { v: "90-days",     l: "Within 90 days" },
+                          { v: "exploring",   l: "Just exploring" },
+                        ],
+                      },
+                    ] as const
+                  ).map((f) => (
+                    <div key={f.id}>
+                      <label htmlFor={f.id} className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
+                        {f.label} <span className="text-[#C87941]">*</span>
+                      </label>
+                      <select
+                        id={f.id} name={f.id} value={form[f.id]} onChange={handleChange}
+                        className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] appearance-none cursor-pointer ${errors[f.id] ? "border-red-500" : "border-white/10"} ${form[f.id] === "" ? "text-[#4A5568]" : "text-white"}`}
+                      >
+                        <option value="" disabled>Select…</option>
+                        {f.options.map((o) => (
+                          <option key={o.v} value={o.v} className="bg-[#1a1f2e] text-white">{o.l}</option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+
+                  <div className="sm:col-span-2">
+                    <label htmlFor="referral" className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
+                      How did you hear about us? <span className="text-[#C87941]">*</span>
+                    </label>
+                    <select
+                      id="referral" name="referral" value={form.referral} onChange={handleChange}
+                      className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] appearance-none cursor-pointer ${errors.referral ? "border-red-500" : "border-white/10"} ${form.referral === "" ? "text-[#4A5568]" : "text-white"}`}
+                    >
+                      <option value="" disabled>Select…</option>
+                      {["LinkedIn", "Referral", "Google", "Other"].map((o) => (
+                        <option key={o} value={o.toLowerCase()} className="bg-[#1a1f2e] text-white">{o}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2 mt-2 flex flex-col items-center gap-4">
+                    <button
+                      type="submit"
+                      className="w-full bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[16px] py-5 rounded-[6px] transition-colors duration-200 flex items-center justify-center gap-2"
+                    >
+                      Continue — Pick Your Time
+                      <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    <p className="text-[13px] text-[#4A5568] text-center">
+                      No commitment. 30-minute conversation. You&apos;ll pick a time on the next step.
+                    </p>
+                  </div>
+                </form>
+              </FadeUp>
+            </>
+          ) : (
+            <>
+              <div className="text-center mb-10" style={{ animation: "fadeScaleIn 0.4s cubic-bezier(0.22,1,0.36,1) both" }}>
+                <div className="inline-flex items-center gap-2 bg-[#C87941]/[0.1] border border-[#C87941]/25 rounded-full px-5 py-2 mb-6">
+                  <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="#C87941" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span className="text-[13px] font-semibold text-[#C87941]">Your info has been saved</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">
+                  Now Pick a Time
+                </h2>
+                <p className="text-[#9CA3AF] text-base max-w-md mx-auto">
+                  Choose a date and time that works for you. Your answers have been pre-filled below.
+                </p>
+              </div>
+
+              <div
+                id="calendly-container"
+                className="rounded-xl overflow-hidden border border-white/[0.07]"
+                style={{ minWidth: "320px", height: "700px" }}
+              />
+            </>
+          )}
+
         </div>
       </section>
 
