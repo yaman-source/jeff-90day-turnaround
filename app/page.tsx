@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Script from "next/script";
 import LampHero from "@/components/ui/lamp-hero";
 
 // ─── Lightweight CSS fade-up (no framer-motion, single IntersectionObserver) ──
@@ -70,7 +71,7 @@ const problems = [
   {
     icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
     title: "You're the bottleneck.",
-    body: "Every decision, every problem, every fire circles back to you. Nothing moves without your sign-off, and that's suffocating the business.",
+    body: "Every hire, every client escalation, every decision runs through you. Your team can't move without your approval, and that single point of failure is strangling your growth.",
   },
   {
     icon: "M18 20V10M12 20V4M6 20v-6",
@@ -95,7 +96,7 @@ const problems = [
   {
     icon: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 6v6l4 2",
     title: "You're busy, not strategic.",
-    body: "You work in the business constantly. Rarely on it. The vision is buried under daily fires, and you can't see a clear path out of the chaos.",
+    body: "Your calendar is full but your business isn't moving forward. You're managing instead of leading, reacting instead of building, and the big picture keeps getting buried under today's noise.",
   },
 ];
 
@@ -177,25 +178,9 @@ const offers = [
   },
 ];
 
-// ─── Form initial state ───────────────────────────────────────────────────────
-const emptyForm = {
-  fname: "",
-  lname: "",
-  email: "",
-  company: "",
-  website: "",
-  challenge: "",
-  service: "",
-  timeline: "",
-  referral: "",
-};
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
-  const [form, setForm] = useState(emptyForm);
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
-  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     let rafId = 0;
@@ -209,35 +194,6 @@ export default function Home() {
 
   const scrollTo = (id: string) =>
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
-  ) => {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-    setErrors((err) => ({ ...err, [e.target.name]: false }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newErrors: Record<string, boolean> = {};
-    Object.entries(form).forEach(([k, v]) => {
-      if (!v.trim()) newErrors[k] = true;
-    });
-    if (Object.keys(newErrors).length) {
-      setErrors(newErrors);
-      const first = Object.keys(newErrors)[0];
-      document.getElementById(first)?.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
-    }
-    setSubmitted(true);
-    window.open("https://calendly.com/jt-sales/30min", "_blank");
-    // Fire-and-forget: save to HubSpot + send email notification
-    fetch("/api/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    }).catch(() => {/* silent — UX is never blocked by API errors */});
-  };
 
   return (
     <main className="bg-[#0D0D0D] text-white" style={{ overflowX: "clip" }}>
@@ -617,14 +573,13 @@ export default function Home() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          TESTIMONIALS PLACEHOLDER — hidden until real content is ready
+          TESTIMONIALS
       ════════════════════════════════════════════════════════════════ */}
-      {/* <section className="py-24 px-6 bg-[#111827]">
+      <section className="py-28 px-6 bg-[#111827]">
         <div className="max-w-6xl mx-auto">
-          <FadeUp className="text-center mb-14">
-            <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">
-              Client Results
-            </span>
+
+          <FadeUp className="text-center mb-16">
+            <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">Client Results</span>
             <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
               What Our Clients Say
             </h2>
@@ -633,176 +588,163 @@ export default function Home() {
             </p>
           </FadeUp>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {[0, 1, 2].map((i) => (
-              <FadeUp key={i} delay={i * 0.1}>
-                <div className="flex flex-col p-8 rounded-xl bg-white/[0.025] border border-white/[0.07] h-full min-h-[260px]">
-                  <div className="text-5xl font-black text-[#C87941]/20 leading-none mb-4 select-none">&ldquo;</div>
-                  <div className="flex-1 mb-6">
-                    <div className="h-4 bg-white/[0.05] rounded mb-3 w-full" />
-                    <div className="h-4 bg-white/[0.05] rounded mb-3 w-5/6" />
-                    <div className="h-4 bg-white/[0.05] rounded w-4/6" />
-                  </div>
-                  <div className="border-t border-white/[0.06] pt-5">
-                    <div className="h-3.5 bg-white/[0.06] rounded mb-2 w-32" />
-                    <div className="h-3 bg-white/[0.04] rounded w-24" />
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          {/* ── Featured testimonial — Roger Foster ── */}
+          <FadeUp delay={0.1}>
+            <div className="relative rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-[#C87941]/25 p-8 md:p-10 shadow-[0_0_80px_rgba(200,121,65,0.07)] h-full">
+
+              {/* Large decorative quote mark */}
+              <div className="absolute top-8 right-10 text-[120px] font-black text-[#C87941]/[0.07] leading-none select-none pointer-events-none">&ldquo;</div>
+
+              {/* Stars */}
+              <div className="flex gap-1 mb-8">
+                {[0,1,2,3,4].map(i => (
+                  <svg key={i} width={20} height={20} viewBox="0 0 24 24" fill="#C87941" className="flex-shrink-0">
+                    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+                  </svg>
+                ))}
+              </div>
+
+              {/* Quote */}
+              <blockquote className="text-[17px] md:text-xl text-white/90 leading-[1.8] font-light mb-10 relative z-10">
+                &ldquo;One of the biggest benefits was simply having experienced outside eyes looking into our business.
+                When you have been inside your own company for a long time, it is very easy to get tunnel vision.
+                Jeff helped me step back and look at our business more clearly — our strengths, our weaknesses,
+                and where we could operate better and communicate our value more effectively.
+                His coaching was practical, direct, and useful. It gave me tools and ideas I could actually use.
+                I would recommend Jeff Lawrence and the 90 Day Turnaround program to any business owner who wants
+                a clearer outside perspective, better focus, and practical help improving their business.&rdquo;
+              </blockquote>
+
+              {/* Highlights */}
+              <div className="flex flex-wrap gap-2 mb-10">
+                {["Time management", "Social media strategy", "AI tools implementation", "Competing with larger franchises"].map(tag => (
+                  <span key={tag} className="text-[11px] font-semibold uppercase tracking-[1px] text-[#C87941] bg-[#C87941]/10 border border-[#C87941]/20 px-3 py-1.5 rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* Author */}
+              <div className="flex items-center gap-5 border-t border-white/[0.07] pt-8">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#C87941]/40 flex-shrink-0 bg-white/[0.05]">
+                  <img
+                    src="/roger-foster.jpg"
+                    alt="Roger Foster"
+                    className="w-full h-full object-cover object-top"
+                  />
                 </div>
-              </FadeUp>
-            ))}
+                <div>
+                  <p className="text-white font-bold text-[17px] leading-tight">Roger Foster</p>
+                  <p className="text-[#C87941] text-[13px] font-semibold mt-0.5">Owner, Tires On The Run</p>
+                  <p className="text-[#9CA3AF] text-[12px] mt-0.5">Airdrie, Alberta</p>
+                </div>
+                <div className="ml-auto hidden sm:block text-right">
+                  <p className="text-[11px] font-bold uppercase tracking-[1.4px] text-[#9CA3AF]/50">Advisory Coaching</p>
+                  <p className="text-[11px] text-[#9CA3AF]/40 mt-0.5">Client Testimonial</p>
+                </div>
+              </div>
+
+            </div>
+          </FadeUp>
+
+          {/* ── Featured testimonial — Geoff Tomlinson ── */}
+          <FadeUp delay={0.18}>
+            <div className="relative rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-[#C87941]/25 p-8 md:p-10 shadow-[0_0_80px_rgba(200,121,65,0.07)] h-full">
+
+              {/* Large decorative quote mark */}
+              <div className="absolute top-8 right-10 text-[120px] font-black text-[#C87941]/[0.07] leading-none select-none pointer-events-none">&ldquo;</div>
+
+              {/* Stars */}
+              <div className="flex gap-1 mb-8">
+                {[0,1,2,3,4].map(i => (
+                  <svg key={i} width={20} height={20} viewBox="0 0 24 24" fill="#C87941" className="flex-shrink-0">
+                    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+                  </svg>
+                ))}
+              </div>
+
+              {/* Quote */}
+              <blockquote className="text-[16px] md:text-lg text-white/90 leading-[1.85] font-light mb-10 relative z-10 space-y-5">
+                <p>
+                  &ldquo;I first started working with Jeff Lawrence through an international nonprofit organization called Mentor Discover Inspire, where we volunteered together. It became clear to me early in our relationship that Jeff was a winner. Over the years, we both rose within the organization until I became President and Jeff became Chairman of the Board.
+                </p>
+                <p>
+                  I have had a long and successful career in financial marketing, advertising, and financial planning, and I have rarely experienced a professional with Jeff&rsquo;s unique combination of intelligence, real-world experience, and personality. It is a combination of skills I have personally benefited from many times over the years, both through our nonprofit work and professionally.
+                </p>
+                <p>
+                  Jeff and I also led many high-level leadership training courses together. In those environments, Jeff consistently demonstrated the ability to communicate difficult concepts in a way people could understand, apply, and put into action.
+                </p>
+                <p>
+                  Simply put, Jeff Lawrence is one of the best. If you want to work with someone who brings experience, clarity, leadership, and real accountability, Jeff Lawrence should be at the top of your list.&rdquo;
+                </p>
+              </blockquote>
+
+              {/* Highlights */}
+              <div className="flex flex-wrap gap-2 mb-10">
+                {["Leadership", "Accountability", "Financial planning", "Training facilitation"].map(tag => (
+                  <span key={tag} className="text-[11px] font-semibold uppercase tracking-[1px] text-[#C87941] bg-[#C87941]/10 border border-[#C87941]/20 px-3 py-1.5 rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* Author */}
+              <div className="flex items-center gap-5 border-t border-white/[0.07] pt-8">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#C87941]/40 flex-shrink-0 bg-white/[0.05]">
+                  <img
+                    src="/geoff-tomlinson.jpg"
+                    alt="Geoff Tomlinson"
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
+                <div>
+                  <p className="text-white font-bold text-[17px] leading-tight">Geoff Tomlinson</p>
+                  <p className="text-[#C87941] text-[13px] font-semibold mt-0.5">Former President, Mentor Discover Inspire</p>
+                  <p className="text-[#9CA3AF] text-[12px] mt-0.5">Senior Financial Consultant</p>
+                </div>
+                <div className="ml-auto hidden sm:block text-right">
+                  <p className="text-[11px] font-bold uppercase tracking-[1.4px] text-[#9CA3AF]/50">Leadership Endorsement</p>
+                  <p className="text-[11px] text-[#9CA3AF]/40 mt-0.5">Client Testimonial</p>
+                </div>
+              </div>
+
+            </div>
+          </FadeUp>
           </div>
+
         </div>
-      </section> */}
+      </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          INTAKE FORM
+          CALENDLY BOOKING
       ════════════════════════════════════════════════════════════════ */}
       <section id="qualify" className="py-28 px-6 bg-[#0D0D0D]">
         <div className="max-w-[780px] mx-auto">
           <FadeUp className="text-center mb-14">
             <span className="text-[11px] font-bold tracking-[1.8px] uppercase text-[#C87941] block mb-4">
-              Apply for a Discovery Call
+              Book a Discovery Call
             </span>
             <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
               Let&apos;s Start the Conversation
             </h2>
             <p className="text-[#9CA3AF] text-lg max-w-lg mx-auto leading-relaxed">
-              Jeff works with a limited number of businesses at a time. Complete the form below
-              so we can determine if there&apos;s a fit before scheduling your call.
+              Jeff works with a limited number of businesses at a time. Pick a time below and
+              tell us a bit about where you are — we&apos;ll make the most of our 30 minutes together.
             </p>
           </FadeUp>
 
-          {!submitted ? (
-            <FadeUp delay={0.1}>
-              <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {(
-                  [
-                    { id: "fname", label: "First Name", type: "text", placeholder: "Jeff", col: 1 },
-                    { id: "lname", label: "Last Name", type: "text", placeholder: "Lawrence", col: 1 },
-                    { id: "email", label: "Business Email", type: "email", placeholder: "you@yourcompany.com", col: 1 },
-                    { id: "company", label: "Company Name", type: "text", placeholder: "Acme Corp.", col: 1 },
-                    { id: "website", label: "Company Website", type: "url", placeholder: "https://yourcompany.com", col: 2 },
-                  ] as const
-                ).map((f) => (
-                  <div key={f.id} className={f.col === 2 ? "sm:col-span-2" : ""}>
-                    <label htmlFor={f.id} className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
-                      {f.label} <span className="text-[#C87941]">*</span>
-                    </label>
-                    <input
-                      id={f.id} name={f.id} type={f.type} placeholder={f.placeholder}
-                      value={form[f.id]} onChange={handleChange}
-                      className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] text-white placeholder:text-[#4A5568] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] ${errors[f.id] ? "border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.13)]" : "border-white/10"}`}
-                    />
-                  </div>
-                ))}
-
-                <div className="sm:col-span-2">
-                  <label htmlFor="challenge" className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
-                    What is your biggest challenge right now? <span className="text-[#C87941]">*</span>
-                  </label>
-                  <textarea
-                    id="challenge" name="challenge" rows={4}
-                    placeholder="Be specific, what's the thing keeping you up at night?"
-                    value={form.challenge} onChange={handleChange}
-                    className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] text-white placeholder:text-[#4A5568] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] resize-y ${errors.challenge ? "border-red-500" : "border-white/10"}`}
-                  />
-                </div>
-
-                {(
-                  [
-                    {
-                      id: "service",
-                      label: "Which service are you most interested in?",
-                      options: [
-                        { v: "90-day-turnaround-sprint", l: "90-Day Turnaround Sprint" },
-                        { v: "growth-accelerator-advisory", l: "Growth Accelerator Advisory" },
-                        { v: "ai-leverage-implementation", l: "AI Leverage Implementation" },
-                        { v: "expansion-readiness-blueprint", l: "Expansion Readiness Blueprint" },
-                        { v: "not-sure", l: "Not sure yet" },
-                      ],
-                    },
-                    {
-                      id: "timeline",
-                      label: "What is your timeline?",
-                      options: [
-                        { v: "immediately", l: "Immediately" },
-                        { v: "30-days", l: "Within 30 days" },
-                        { v: "90-days", l: "Within 90 days" },
-                        { v: "exploring", l: "Just exploring" },
-                      ],
-                    },
-                  ] as const
-                ).map((f) => (
-                  <div key={f.id}>
-                    <label htmlFor={f.id} className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
-                      {f.label} <span className="text-[#C87941]">*</span>
-                    </label>
-                    <select
-                      id={f.id} name={f.id} value={form[f.id]} onChange={handleChange}
-                      className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] appearance-none cursor-pointer ${errors[f.id] ? "border-red-500" : "border-white/10"} ${form[f.id] === "" ? "text-[#4A5568]" : "text-white"}`}
-                    >
-                      <option value="" disabled>Select…</option>
-                      {f.options.map((o) => (
-                        <option key={o.v} value={o.v} className="bg-[#1a1f2e] text-white">{o.l}</option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
-
-                <div className="sm:col-span-2">
-                  <label htmlFor="referral" className="block text-[12px] font-bold uppercase tracking-[0.4px] text-white mb-2">
-                    How did you hear about us? <span className="text-[#C87941]">*</span>
-                  </label>
-                  <select
-                    id="referral" name="referral" value={form.referral} onChange={handleChange}
-                    className={`w-full bg-white/[0.04] border rounded-[6px] px-4 py-3.5 text-[15px] outline-none transition-all duration-200 focus:border-[#C87941] focus:shadow-[0_0_0_3px_rgba(200,121,65,0.14)] appearance-none cursor-pointer ${errors.referral ? "border-red-500" : "border-white/10"} ${form.referral === "" ? "text-[#4A5568]" : "text-white"}`}
-                  >
-                    <option value="" disabled>Select…</option>
-                    {["LinkedIn", "Referral", "Google", "Other"].map((o) => (
-                      <option key={o} value={o.toLowerCase()} className="bg-[#1a1f2e] text-white">{o}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="sm:col-span-2 mt-2 flex flex-col items-center gap-4">
-                  <button
-                    type="submit"
-                    className="w-full bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[16px] py-5 rounded-[6px] transition-colors duration-200"
-                  >
-                    Book a Discovery Call
-                  </button>
-                  <p className="text-[13px] text-[#4A5568] text-center">
-                    We review every application personally and will reach out within 3 to 4 business days.
-                  </p>
-                </div>
-              </form>
-            </FadeUp>
-          ) : (
+          <FadeUp delay={0.1}>
             <div
-              className="text-center py-16 px-8 bg-[#C87941]/[0.06] border border-[#C87941]/25 rounded-xl"
-              style={{ animation: "fadeScaleIn 0.5s cubic-bezier(0.22,1,0.36,1) both" }}
-            >
-              <div className="w-20 h-20 bg-[#C87941]/10 rounded-full flex items-center justify-center mx-auto mb-7">
-                <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="#C87941" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              <h3 className="text-3xl font-black mb-4">Application Received.</h3>
-              <p className="text-[#9CA3AF] text-[16px] max-w-md mx-auto leading-relaxed mb-10">
-                Thanks for applying. Jeff&apos;s team reviews every submission personally. If
-                there&apos;s a fit, you&apos;ll hear back within 3 to 4 business days to schedule
-                your discovery call.
-              </p>
-              <a
-                href="https://calendly.com/jt-sales/30min"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-[#C87941] hover:bg-[#b06830] text-white font-bold text-[16px] px-12 py-5 rounded-[6px] transition-colors duration-200"
-              >
-                Book Your Discovery Call
-              </a>
-            </div>
-          )}
+              className="calendly-inline-widget rounded-xl overflow-hidden border border-white/[0.07]"
+              data-url="https://calendly.com/jt-sales/30min?background_color=0D0D0D&text_color=FFFFFF&primary_color=C87941"
+              style={{ minWidth: "320px", height: "700px" }}
+            />
+            <Script
+              src="https://assets.calendly.com/assets/external/widget.js"
+              strategy="lazyOnload"
+            />
+          </FadeUp>
         </div>
       </section>
 

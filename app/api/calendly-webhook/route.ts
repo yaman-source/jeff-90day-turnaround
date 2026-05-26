@@ -39,13 +39,18 @@ export async function POST(req: NextRequest) {
     : undefined;
 
   // questions_and_answers — array format: [{question, answer}, ...]
+  // Populated for custom questions added to the Calendly event type.
   const qas = (payload?.questions_and_answers ?? []) as Array<{ question: string; answer: string }>;
 
   // questions_and_responses — flat format: {"1_question": "Email", "1_response": "...", ...}
-  // This is how Calendly v2 API webhooks store standard fields when invitee is a URI reference.
+  // Used for standard fields (name/email) when invitee is a URI reference.
   const qrs = (payload?.questions_and_responses ?? {}) as Record<string, string>;
 
-  // Search questions_and_responses for a keyword (e.g. "email", "name")
+  // Helper: search questions_and_answers by keyword
+  const findInQAS = (keyword: RegExp): string =>
+    qas.find(qa => keyword.test(qa.question ?? ""))?.answer?.trim() ?? "";
+
+  // Helper: search questions_and_responses (flat numbered object) by keyword
   const findInQRS = (keyword: RegExp): string => {
     const keys = Object.keys(qrs);
     for (const key of keys) {
@@ -59,19 +64,18 @@ export async function POST(req: NextRequest) {
   console.log("🔑 QAs count:", qas.length, "| QRS keys:", Object.keys(qrs).length,
               "| invitee type:", typeof inviteeRaw, "| event type:", typeof eventRaw);
 
-  // Extract email — try all possible locations
+  // ── Extract standard fields — try all possible locations ─────────────────────
   const emailRaw =
     (invitee?.email as string | null | undefined) ||
-    qas.find(qa => /email/i.test(qa.question ?? ""))?.answer ||
+    findInQAS(/email/i) ||
     findInQRS(/email/i) ||
     "";
   const email = emailRaw.trim().toLowerCase();
 
-  // Extract name — try all possible locations
   const name =
     (invitee?.name as string) ||
     `${(invitee?.first_name as string) || ""} ${(invitee?.last_name as string) || ""}`.trim() ||
-    qas.find(qa => /^name$/i.test(qa.question ?? ""))?.answer ||
+    findInQAS(/^name$/i) ||
     findInQRS(/name/i) ||
     "Unknown";
 
@@ -79,7 +83,16 @@ export async function POST(req: NextRequest) {
   const startTime = (meeting?.start_time as string) || "";
   const endTime   = (meeting?.end_time   as string) || "";
 
+  // ── Extract custom Calendly question answers ──────────────────────────────────
+  const company   = findInQAS(/company/i);
+  const website   = findInQAS(/website/i);
+  const challenge = findInQAS(/challenge/i);
+  const service   = findInQAS(/service/i);
+  const timeline  = findInQAS(/timeline/i);
+  const referral  = findInQAS(/referral|hear about/i);
+
   console.log("📌 Extracted — name:", name, "| email:", email, "| start:", startTime || "(no inline time)");
+  console.log("📋 Custom answers — company:", company, "| service:", service, "| timeline:", timeline);
 
   // ── Guard: skip only if we have absolutely nothing useful (true test ping) ───
   if (!email && name === "Unknown") {
@@ -101,134 +114,122 @@ export async function POST(req: NextRequest) {
     }
   };
 
-  // ── Look up this person in HubSpot by email to get landing page form data ───
-  // The form saves: challenge, service interest, timeline, referral into the
-  // HubSpot "message" field in a structured format when the user submits the
-  // landing page application form.
-  let formData: {
-    company?:   string;
-    website?:   string;
-    challenge?: string;
-    service?:   string;
-    timeline?:  string;
-    referral?:  string;
-    firstname?: string;
-    lastname?:  string;
-  } | null = null;
-
+  // ── Create / update HubSpot contact from Calendly booking data ───────────────
   if (process.env.HUBSPOT_TOKEN && email) {
     try {
-      const searchRes = await fetch(
-        "https://api.hubapi.com/crm/v3/objects/contacts/search",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.HUBSPOT_TOKEN}`,
-          },
-          body: JSON.stringify({
-            filterGroups: [
+      const nameParts = name.split(" ");
+      const firstName = nameParts[0] || name;
+      const lastName  = nameParts.slice(1).join(" ") || "";
+
+      const contactProps: Record<string, string> = {
+        email,
+        firstname:      firstName,
+        lastname:       lastName,
+        lifecyclestage: "lead",
+      };
+      if (company)   contactProps.company = company;
+      if (website)   contactProps.website = website;
+      if (challenge || service || timeline || referral) {
+        contactProps.message =
+          `Challenge: ${challenge}\n\nService interest: ${service}\nTimeline: ${timeline}\nReferral: ${referral}`;
+      }
+
+      // Try to create — if contact already exists (409) fall back to PATCH
+      const createRes = await fetch("https://api.hubapi.com/crm/v3/objects/contacts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.HUBSPOT_TOKEN}`,
+        },
+        body: JSON.stringify({ properties: contactProps }),
+      });
+
+      console.log("🏗️ HubSpot create status:", createRes.status);
+
+      if (createRes.status === 409) {
+        // Contact already exists — look up their ID then patch
+        const searchRes = await fetch(
+          "https://api.hubapi.com/crm/v3/objects/contacts/search",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.HUBSPOT_TOKEN}`,
+            },
+            body: JSON.stringify({
+              filterGroups: [{
+                filters: [{ propertyName: "email", operator: "EQ", value: email }],
+              }],
+              properties: ["hs_object_id"],
+              limit: 1,
+            }),
+          }
+        );
+        if (searchRes.ok) {
+          const sd = await searchRes.json();
+          const contactId = sd.results?.[0]?.id as string | undefined;
+          if (contactId) {
+            const patchRes = await fetch(
+              `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}`,
               {
-                filters: [
-                  { propertyName: "email", operator: "EQ", value: email.toLowerCase().trim() },
-                ],
-              },
-            ],
-            properties: ["firstname", "lastname", "company", "website", "message"],
-            limit: 1,
-          }),
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${process.env.HUBSPOT_TOKEN}`,
+                },
+                body: JSON.stringify({ properties: contactProps }),
+              }
+            );
+            console.log("✅ HubSpot contact updated:", contactId, "status:", patchRes.status);
+          }
         }
-      );
-
-      console.log("🔍 HubSpot search status:", searchRes.status);
-
-      if (searchRes.ok) {
-        const data = await searchRes.json();
-        console.log("🔍 HubSpot results count:", data.results?.length ?? 0);
-
-        if (data.results?.length > 0) {
-          const props = data.results[0].properties as Record<string, string>;
-          console.log("✅ HubSpot contact properties:", JSON.stringify(props, null, 2));
-
-          // The message field was saved as:
-          // "Challenge: <text>\n\nService interest: <value>\nTimeline: <value>\nReferral: <value>"
-          //
-          // Fix: normalise line endings (HubSpot may return \r\n) and use
-          // robust regex so multi-line challenge text is fully captured.
-          const raw = (props.message ?? "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-          // Challenge: grab everything between "Challenge:" and the next blank line
-          // (or the next labelled field), supporting multi-line answers.
-          const challengeMatch = raw.match(/Challenge:\s*([\s\S]+?)(?=\n\nService interest:|\n\nTimeline:|\n\nReferral:|$)/i);
-          const challenge = challengeMatch?.[1]?.trim() ?? "";
-
-          // Single-line fields – stop at next newline
-          const extractLine = (label: string): string => {
-            const m = raw.match(new RegExp(`${label}:\\s*(.+?)(?:\n|$)`, "i"));
-            return m?.[1]?.trim() ?? "";
-          };
-
-          formData = {
-            firstname: props.firstname ?? "",
-            lastname:  props.lastname  ?? "",
-            company:   props.company   ?? "",
-            website:   props.website   ?? "",
-            challenge,
-            service:  extractLine("Service interest"),
-            timeline: extractLine("Timeline"),
-            referral: extractLine("Referral"),
-          };
-
-          console.log("📋 Parsed form data:", JSON.stringify(formData, null, 2));
-        } else {
-          console.log("⚠️ No HubSpot contact found for email:", email);
-        }
+      } else if (createRes.ok) {
+        const created = await createRes.json() as { id?: string };
+        console.log("✅ HubSpot contact created:", created.id);
       } else {
-        const errText = await searchRes.text();
-        console.error("❌ HubSpot search failed:", searchRes.status, errText);
+        const errText = await createRes.text();
+        console.error("❌ HubSpot create failed:", createRes.status, errText);
       }
     } catch (err) {
-      console.error("❌ HubSpot lookup threw:", err);
+      console.error("❌ HubSpot create/update threw:", err);
     }
   }
 
   // ── Send Jeff the notification email ────────────────────────────────────────
   if (process.env.RESEND_API_KEY) {
 
-    // ── Application form section ─────────────────────────────────────────────
-    const formSection = formData
+    // ── Application / booking form section ───────────────────────────────────
+    const hasFormData = !!(company || website || challenge || service || timeline || referral);
+
+    const formSection = hasFormData
       ? `
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-        <h3 style="margin:0 0 16px 0;color:#111;font-size:16px">📋 Landing Page Application</h3>
+        <h3 style="margin:0 0 16px 0;color:#111;font-size:16px">📋 Booking Form Answers</h3>
 
         <table style="width:100%;border-collapse:collapse;font-size:14px">
           <tr>
-            <td style="padding:8px 0;color:#888;width:140px;vertical-align:top">Name</td>
-            <td style="padding:8px 0;font-weight:600">${(formData.firstname ?? "") + " " + (formData.lastname ?? "")}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px 0;color:#888;vertical-align:top">Company</td>
-            <td style="padding:8px 0;font-weight:600">${formData.company || "—"}</td>
+            <td style="padding:8px 0;color:#888;width:140px;vertical-align:top">Company</td>
+            <td style="padding:8px 0;font-weight:600">${company || "—"}</td>
           </tr>
           <tr>
             <td style="padding:8px 0;color:#888;vertical-align:top">Website</td>
             <td style="padding:8px 0">
-              ${formData.website
-                ? `<a href="${formData.website}" style="color:#C87941">${formData.website}</a>`
+              ${website
+                ? `<a href="${website}" style="color:#C87941">${website}</a>`
                 : "—"}
             </td>
           </tr>
           <tr>
             <td style="padding:8px 0;color:#888;vertical-align:top">Service</td>
-            <td style="padding:8px 0">${formData.service || "—"}</td>
+            <td style="padding:8px 0">${service || "—"}</td>
           </tr>
           <tr>
             <td style="padding:8px 0;color:#888;vertical-align:top">Timeline</td>
-            <td style="padding:8px 0">${formData.timeline || "—"}</td>
+            <td style="padding:8px 0">${timeline || "—"}</td>
           </tr>
           <tr>
             <td style="padding:8px 0;color:#888;vertical-align:top">Referral</td>
-            <td style="padding:8px 0">${formData.referral || "—"}</td>
+            <td style="padding:8px 0">${referral || "—"}</td>
           </tr>
         </table>
 
@@ -236,15 +237,15 @@ export async function POST(req: NextRequest) {
           Their Biggest Challenge
         </p>
         <div style="background:#f9f9f9;padding:14px 16px;border-left:3px solid #C87941;border-radius:4px;font-size:14px;line-height:1.7;white-space:pre-wrap">
-${formData.challenge || "—"}
+${challenge || "—"}
         </div>
       `
       : `
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
         <div style="background:#fff8f0;padding:12px 16px;border-left:3px solid #f0a060;border-radius:4px;color:#555;font-size:13px">
-          ⚠️ <strong>No landing page form found for this email.</strong><br/>
-          They may have booked directly via Calendly without submitting the website application first.
-          Check HubSpot manually for any existing contact record.
+          ⚠️ <strong>No custom form answers found.</strong><br/>
+          They may have booked without answering the custom questions, or the answers were in an unexpected format.
+          Check HubSpot for the contact record.
         </div>
       `;
 
@@ -264,7 +265,7 @@ ${formData.challenge || "—"}
           <tr>
             <td style="padding:8px 0;color:#888">Email</td>
             <td style="padding:8px 0">
-              <a href="mailto:${email}" style="color:#C87941">${email}</a>
+              <a href="mailto:${email}" style="color:#C87941">${email || "—"}</a>
             </td>
           </tr>
           <tr>
@@ -277,7 +278,7 @@ ${formData.challenge || "—"}
           </tr>
           <tr>
             <td style="padding:8px 0;color:#888">Timezone</td>
-            <td style="padding:8px 0">${timezone}</td>
+            <td style="padding:8px 0">${timezone || "—"}</td>
           </tr>
         </table>
 
