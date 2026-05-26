@@ -27,19 +27,37 @@ export async function POST(req: NextRequest) {
   console.log("🔑 Payload keys:", payload ? Object.keys(payload) : "null/undefined");
 
   const invitee = payload?.invitee as Record<string, unknown> | undefined;
-  const meeting = payload?.event as Record<string, unknown> | undefined;
+  const meeting = payload?.event   as Record<string, unknown> | undefined;
 
-  // ── Guard: if no invitee data, it's a Calendly test ping — skip silently ────
-  if (!invitee || !invitee.email) {
-    console.log("⚠️ No invitee data in payload — likely a Calendly test ping, skipping");
-    return NextResponse.json({ ok: true, skipped: true, reason: "no_invitee" });
-  }
+  // questions_and_answers array — Calendly may put email/name here instead of
+  // (or in addition to) the invitee object, depending on the account plan/config.
+  const qas = (payload?.questions_and_answers ?? []) as Array<{ question: string; answer: string }>;
+  console.log("🔑 QAs count:", qas.length, "| invitee.email:", invitee?.email ?? "null");
 
-  const name      = (invitee.name     as string) || "Unknown";
-  const email     = (invitee.email    as string) || "";
-  const timezone  = (invitee.timezone as string) || "";
+  // Try invitee object first, fall back to questions_and_answers
+  const emailRaw =
+    (invitee?.email as string | null | undefined) ||
+    qas.find(qa => /email/i.test(qa.question ?? ""))?.answer ||
+    "";
+  const email    = emailRaw.trim().toLowerCase();
+
+  const name =
+    (invitee?.name as string) ||
+    `${(invitee?.first_name as string) || ""} ${(invitee?.last_name as string) || ""}`.trim() ||
+    qas.find(qa => /name/i.test(qa.question ?? ""))?.answer ||
+    "Unknown";
+
+  const timezone  = (invitee?.timezone as string) || "";
   const startTime = (meeting?.start_time as string) || "";
   const endTime   = (meeting?.end_time   as string) || "";
+
+  console.log("📌 Extracted — name:", name, "| email:", email, "| start:", startTime);
+
+  // ── Guard: completely empty payload = Calendly test ping on webhook creation ─
+  if (!email && !startTime && name === "Unknown") {
+    console.log("⚠️ Empty payload — Calendly test ping, skipping");
+    return NextResponse.json({ ok: true, skipped: true, reason: "empty_payload" });
+  }
 
   // Format the meeting time nicely (Mountain/Edmonton time)
   const formatTime = (iso: string) => {
