@@ -79,9 +79,11 @@ export async function POST(req: NextRequest) {
     findInQRS(/name/i) ||
     "Unknown";
 
-  const timezone  = (invitee?.timezone as string) || "";
-  const startTime = (meeting?.start_time as string) || "";
-  const endTime   = (meeting?.end_time   as string) || "";
+  const timezone = (invitee?.timezone as string) || "";
+
+  // cancel_url and reschedule_url are always directly in the payload (no API call needed)
+  const cancelUrl     = (payload?.cancel_url     as string) || "";
+  const rescheduleUrl = (payload?.reschedule_url as string) || "";
 
   // ── Extract custom Calendly question answers ──────────────────────────────────
   const company   = findInQAS(/company/i);
@@ -91,7 +93,7 @@ export async function POST(req: NextRequest) {
   const timeline  = findInQAS(/timeline/i);
   const referral  = findInQAS(/referral|hear about/i);
 
-  console.log("📌 Extracted — name:", name, "| email:", email, "| start:", startTime || "(no inline time)");
+  console.log("📌 Extracted — name:", name, "| email:", email);
   console.log("📋 Custom answers — company:", company, "| service:", service, "| timeline:", timeline);
 
   // ── Guard: skip only if we have absolutely nothing useful (true test ping) ───
@@ -100,9 +102,42 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, skipped: true, reason: "empty_payload" });
   }
 
+  // ── Fetch full event details from Calendly API ────────────────────────────────
+  // payload.event is a URI string in v2 webhooks, so start_time / end_time / join_url
+  // are NOT in the payload directly — we must call the Calendly API to get them.
+  let startTime = (meeting?.start_time as string) || "";
+  let endTime   = (meeting?.end_time   as string) || "";
+  let joinUrl   = "";
+
+  if (typeof eventRaw === "string" && process.env.CALENDLY_TOKEN) {
+    try {
+      const eventUuid = (eventRaw as string).split("/").pop();
+      const evRes = await fetch(
+        `https://api.calendly.com/scheduled_events/${eventUuid}`,
+        { headers: { Authorization: `Bearer ${process.env.CALENDLY_TOKEN}` } }
+      );
+      console.log("📅 Calendly event fetch status:", evRes.status);
+      if (evRes.ok) {
+        const evData = await evRes.json() as { resource?: Record<string, unknown> };
+        const r = evData.resource ?? {};
+        startTime = startTime || (r.start_time as string) || "";
+        endTime   = endTime   || (r.end_time   as string) || "";
+        const loc = r.location as Record<string, unknown> | undefined;
+        joinUrl   = (loc?.join_url  as string)
+                 || (loc?.location  as string)
+                 || "";
+        console.log("✅ Calendly event — start:", startTime, "| joinUrl:", joinUrl || "(none)");
+      }
+    } catch (err) {
+      console.error("❌ Calendly event fetch threw:", err);
+    }
+  } else if (!process.env.CALENDLY_TOKEN) {
+    console.warn("⚠️ CALENDLY_TOKEN not set — cannot fetch meeting time or join URL");
+  }
+
   // Format the meeting time nicely (Mountain/Edmonton time)
   const formatTime = (iso: string) => {
-    if (!iso) return "Unknown";
+    if (!iso) return "—";
     try {
       return new Date(iso).toLocaleString("en-CA", {
         timeZone: "America/Edmonton",
@@ -254,39 +289,69 @@ ${challenge || "—"}
     const html = `
       <div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#111">
 
-        <h2 style="color:#C87941;margin-bottom:4px">📅 Discovery Call Booked</h2>
-        <p style="color:#666;margin-top:0;font-size:14px">Someone just scheduled a call with you on Calendly.</p>
+        <!-- Header -->
+        <h2 style="color:#C87941;margin:0 0 4px 0">📅 Discovery Call Booked</h2>
+        <p style="color:#666;margin:0 0 24px 0;font-size:14px">
+          ${name} just confirmed their Calendly slot. Their full application is below.
+        </p>
 
-        <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-        <h3 style="margin:0 0 14px 0;color:#111;font-size:16px">📆 Meeting Details</h3>
-        <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <!-- ── Meeting time block ── -->
+        <div style="background:#fff8f2;border:1px solid #f0d0b0;border-radius:8px;padding:20px 24px;margin-bottom:24px">
+          <p style="margin:0 0 4px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#C87941">Scheduled For</p>
+          <p style="margin:0 0 2px 0;font-size:20px;font-weight:800;color:#111">${formatTime(startTime)}</p>
+          ${endTime ? `<p style="margin:0;font-size:13px;color:#888">Ends: ${formatTime(endTime)}${timezone ? " · " + timezone : ""}</p>` : ""}
+        </div>
+
+        <!-- ── Join / action buttons ── -->
+        <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
           <tr>
-            <td style="padding:8px 0;color:#888;width:140px">Name</td>
-            <td style="padding:8px 0;font-weight:600">${name}</td>
+            ${joinUrl ? `
+            <td style="padding-right:8px">
+              <a href="${joinUrl}" style="display:block;background:#C87941;color:#fff;font-weight:700;font-size:14px;text-align:center;padding:12px 16px;border-radius:6px;text-decoration:none">
+                🎥 Join Meeting
+              </a>
+            </td>` : ""}
+            ${cancelUrl ? `
+            <td style="padding-right:8px">
+              <a href="${cancelUrl}" style="display:block;background:#f5f5f5;color:#555;font-weight:600;font-size:14px;text-align:center;padding:12px 16px;border-radius:6px;text-decoration:none;border:1px solid #ddd">
+                ✕ Cancel
+              </a>
+            </td>` : ""}
+            ${rescheduleUrl ? `
+            <td>
+              <a href="${rescheduleUrl}" style="display:block;background:#f5f5f5;color:#555;font-weight:600;font-size:14px;text-align:center;padding:12px 16px;border-radius:6px;text-decoration:none;border:1px solid #ddd">
+                ↺ Reschedule
+              </a>
+            </td>` : ""}
+          </tr>
+        </table>
+
+        <!-- ── Contact details ── -->
+        <hr style="border:none;border-top:1px solid #eee;margin:0 0 16px 0"/>
+        <h3 style="margin:0 0 12px 0;color:#111;font-size:15px">👤 Contact Details</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
+          <tr>
+            <td style="padding:7px 0;color:#888;width:130px">Name</td>
+            <td style="padding:7px 0;font-weight:600">${name}</td>
           </tr>
           <tr>
-            <td style="padding:8px 0;color:#888">Email</td>
-            <td style="padding:8px 0">
-              <a href="mailto:${email}" style="color:#C87941">${email || "—"}</a>
-            </td>
+            <td style="padding:7px 0;color:#888">Email</td>
+            <td style="padding:7px 0"><a href="mailto:${email}" style="color:#C87941">${email || "—"}</a></td>
           </tr>
           <tr>
-            <td style="padding:8px 0;color:#888">Time</td>
-            <td style="padding:8px 0;font-weight:600">${formatTime(startTime)}</td>
+            <td style="padding:7px 0;color:#888">Company</td>
+            <td style="padding:7px 0;font-weight:600">${company || "—"}</td>
           </tr>
           <tr>
-            <td style="padding:8px 0;color:#888">End Time</td>
-            <td style="padding:8px 0">${formatTime(endTime)}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px 0;color:#888">Timezone</td>
-            <td style="padding:8px 0">${timezone || "—"}</td>
+            <td style="padding:7px 0;color:#888">Website</td>
+            <td style="padding:7px 0">${website ? `<a href="${website}" style="color:#C87941">${website}</a>` : "—"}</td>
           </tr>
         </table>
 
         ${formSection}
 
-        <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
+        <!-- Footer -->
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0 12px 0"/>
         <p style="color:#aaa;font-size:12px;margin:0">90 Day Turnaround · 90dayturnaround.ca</p>
 
       </div>
@@ -302,7 +367,7 @@ ${challenge || "—"}
         body: JSON.stringify({
           from: process.env.RESEND_FROM ?? "90 Day Turnaround <onboarding@resend.dev>",
           to: [process.env.NOTIFY_EMAIL ?? "jeff@90dayturnaround.ca"],
-          subject: `📅 Call Booked: ${name} — ${formatTime(startTime)}`,
+          subject: `📅 Call Booked: ${name}${startTime ? " — " + formatTime(startTime) : ""}`,
           html,
         }),
       });
