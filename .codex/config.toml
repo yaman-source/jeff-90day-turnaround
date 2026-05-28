@@ -1,0 +1,5 @@
+[mcp_servers.buffer]
+url = "https://mcp.buffer.com/mcp"
+
+[mcp_servers.buffer.http_headers]
+Authorization = "Bearer FJHFZL7WxGk3yQtTN06XAWcY6q1XvUc0dU9fSXtRGZp"

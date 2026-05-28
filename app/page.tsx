@@ -284,24 +284,8 @@ export default function Home() {
       }
     }, 120);
 
-    // ── Listen for Calendly booking completion (browser-side event) ──────────
-    // Fires the moment user confirms their slot inside the Calendly widget.
-    // We use the Step 1 form data (already captured) to send Jeff a
-    // "Call Booked" notification email directly — no webhook needed.
-    const handleCalendlyEvent = (e: MessageEvent) => {
-      if (e.data?.event === "calendly.event_scheduled") {
-        fetch("/api/booking-notification", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        }).catch(() => {});
-      }
-    };
-    window.addEventListener("message", handleCalendlyEvent);
-
     return () => {
       clearTimeout(timer);
-      window.removeEventListener("message", handleCalendlyEvent);
     };
   }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
