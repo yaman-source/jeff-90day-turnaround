@@ -123,9 +123,11 @@ export async function POST(req: NextRequest) {
 
       const contactProps: Record<string, string> = {
         email,
-        firstname:      firstName,
-        lastname:       lastName,
-        lifecyclestage: "lead",
+        firstname:        firstName,
+        lastname:         lastName,
+        lifecyclestage:   "lead",
+        contact_type:     "Prospect",
+        hs_lead_status:   "NEW",
       };
       if (company)   contactProps.company = company;
       if (website)   contactProps.website = website;
