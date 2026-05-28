@@ -289,6 +289,31 @@ export default function Home() {
     };
   }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Listen for Calendly booking confirmation in the browser ─────────────────
+  // Fires when the user clicks "Schedule Event" inside the Calendly widget.
+  // We receive the event URI + invitee URI, post them to /api/booking which
+  // calls the Calendly API for full details and sends Jeff's notification email.
+  useEffect(() => {
+    if (step !== "calendar") return;
+
+    const handleCalendlyMessage = (e: MessageEvent) => {
+      if (e.data?.event !== "calendly.event_scheduled") return;
+      const eventUri   = e.data?.payload?.event?.uri   as string | undefined;
+      const inviteeUri = e.data?.payload?.invitee?.uri as string | undefined;
+      if (!eventUri || !inviteeUri) return;
+
+      console.log("📅 Calendly booking confirmed — firing /api/booking");
+      fetch("/api/booking", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ eventUri, inviteeUri }),
+      }).catch((err) => console.error("❌ /api/booking fetch failed:", err));
+    };
+
+    window.addEventListener("message", handleCalendlyMessage);
+    return () => window.removeEventListener("message", handleCalendlyMessage);
+  }, [step]);
+
   const scrollTo = (id: string) =>
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
